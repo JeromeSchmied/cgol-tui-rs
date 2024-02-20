@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+// extern crate js_sys;
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -77,8 +78,12 @@ impl Universe {
 
     pub fn new(width: u32, height: u32) -> Self {
         let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
+            .map(|_i| {
+                if
+                /*i % 2 == 0 || i % 7 == 0*/
+                fastrand::bool()
+                /*js_sys::Math::random() < 0.5 */
+                {
                     Cell::Alive
                 } else {
                     Cell::Dead
@@ -120,13 +125,16 @@ use std::fmt;
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "╭{}╮", "─".repeat(self.width as usize * 2))?;
         for line in self.cells.as_slice().chunks(self.width as usize) {
+            write!(f, "│")?;
             for &cell in line {
-                let symbol = if cell == Cell::Dead { '◻' } else { '◼' }; // ◻
+                let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
                 write!(f, "{} ", symbol)?;
             }
-            writeln!(f)?;
+            writeln!(f, "│")?;
         }
+        writeln!(f, "╰{}╯", "─".repeat(self.width as usize * 2))?;
         Ok(())
     }
 }

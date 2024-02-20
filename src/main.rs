@@ -1,10 +1,11 @@
 use wasm_game_of_life::Universe;
 
 fn main() {
-    // 64×64 max: 3500
-    // 32×32 max: 80
-    // 38×38 max: 190
-    let n = 190;
+    // if not randomly generated:
+    //     64×64 max: 3500
+    //     32×32 max: 80
+    //     38×38 max: 190
+    let n = 800;
 
     let mut universe = Universe::new(38, 38);
 
