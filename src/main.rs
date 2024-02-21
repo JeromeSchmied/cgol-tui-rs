@@ -1,4 +1,4 @@
-use wasm_game_of_life::Universe;
+use wasm_game_of_life::*;
 
 fn main() {
     // if not randomly generated:
@@ -7,19 +7,19 @@ fn main() {
     //     38×38 max: 190
     let n = 8000;
 
-    let mut universe = Universe::new_figur(32, 32);
+    let mut universe = Universe::from_figur(32, 32, &featherweigth_spaceship());
 
-    println!("{}", universe);
+    // println!("{}", universe);
 
-    // for _ in 0..n {
-    //     universe.tick();
-    //     // clearing
-    //     print!("{}[2J", 27 as char);
-    //     // std::process::Command::new("clear");
+    for _ in 0..n {
+        universe.tick();
+        // clearing
+        print!("{}[2J", 27 as char);
+        // std::process::Command::new("clear");
 
-    //     println!("{}", universe);
+        println!("{}", universe);
 
-    //     // sleeping
-    //     std::thread::sleep(std::time::Duration::from_millis(800));
-    // }
+        // sleeping
+        std::thread::sleep(std::time::Duration::from_millis(80));
+    }
 }

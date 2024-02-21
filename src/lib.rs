@@ -40,27 +40,59 @@ impl Universe {
         sum
     }
 
-    fn from_str(s: &str) -> Self {
-        let mut height = 1;
+    fn from_vec_str(s: &[String]) -> Self {
         let mut cells = Vec::new();
 
-        for ch in s.chars() {
-            if ch == '#' || ch == '1' {
-                cells.push(Cell::Alive);
-            } else if ch == '_' || ch == ' ' || ch == '0' {
-                cells.push(Cell::Dead);
-            } else if ch == '\n' {
-                height += 1;
-            } else {
-                eprintln!("Can't do nothing with this character: {}", ch);
+        for line in s {
+            for ch in line.chars() {
+                if ch == '#' || ch == '1' {
+                    cells.push(Cell::Alive);
+                } else if ch == '_' || ch == ' ' || ch == '0' {
+                    cells.push(Cell::Dead);
+                } else {
+                    eprintln!("Can't do nothing with this character: {}", ch);
+                }
             }
         }
 
         Universe {
-            width: s.len() as u32 / height,
-            height,
+            width: s[0].len() as u32,
+            height: s.len() as u32,
             cells,
         }
+    }
+    pub fn from_figur(width: u32, height: u32, figur: &[String]) -> Self {
+        dbg!(height);
+        dbg!(width);
+
+        let figur = Universe::from_vec_str(figur);
+        println!("{}", &figur);
+
+        assert!(height > figur.height());
+        assert!(width > figur.width());
+
+        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
+        let mut uni = Universe {
+            cells,
+            width,
+            height,
+        };
+
+        let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
+        dbg!(start_row);
+        dbg!(start_col);
+        println!();
+
+        let mut j = 0;
+        for row in start_row as usize..start_row as usize + figur.height() as usize {
+            let idx = uni.get_index(row as u32, start_col);
+            for i in 0..figur.width() as usize {
+                uni.cells[idx + i] = figur.cells[j];
+                j += 1;
+            }
+        }
+
+        uni
     }
 }
 
@@ -121,46 +153,6 @@ impl Universe {
         }
     }
 
-    pub fn new_figur(width: u32, height: u32) -> Self {
-        dbg!(height);
-        dbg!(width);
-
-        // 8×12
-
-        // 64-8 = 56 => 28:row
-        // 64-12 = 52 => 26:col
-
-        // 32-8 = 24 => 12:row
-        // 32-12 = 20 => 10:col
-
-        let figur = Universe::from_str(&copperhead());
-        dbg!(&figur);
-        println!("{}", &figur);
-
-        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
-        let mut uni = Universe {
-            cells,
-            width,
-            height,
-        };
-
-        let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
-        dbg!(start_row);
-        dbg!(start_col);
-        println!();
-
-        let mut j = 0;
-        for row in start_row as usize..start_row as usize + figur.height() as usize {
-            let idx = uni.get_index(row as u32, start_col);
-            for i in 0..figur.width() as usize {
-                uni.cells[idx + i] = figur.cells[j];
-                j += 1;
-            }
-        }
-
-        uni
-    }
-
     pub fn render(&self) -> String {
         self.to_string()
     }
@@ -202,27 +194,96 @@ impl fmt::Display for Universe {
     }
 }
 
-fn two_engine_cordership() -> String {
+pub fn two_engine_cordership() -> String {
+    todo!();
+    // [
+    //     "_".repeat(19),
+    //     "##".into(),
+    //     "_".repeat(19),
+    //     "\n".into(),
+    //     "_".repeat(19),
+    //     "####".into(),
+    //     "_".repeat(17),
+    //     "\n".into(),
+    // ]
+    // .concat()
+}
+
+pub fn copperhead() -> Vec<String> {
+    // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
+    [
+        "_____#_##___".to_owned(),
+        "____#______#".to_owned(),
+        "___##___#__#".to_owned(),
+        "##_#_____##_".to_owned(),
+        "##_#_____##_".to_owned(),
+        "___##___#__#".to_owned(),
+        "____#______#".to_owned(),
+        "_____#_##___".to_owned(),
+    ]
+    .to_vec()
+    // "_____#_##___
+    // ____#______#
+    // ___##___#__#
+    // ##_#_____##_
+    // ##_#_____##_
+    // ___##___#__#
+    // ____#______#
+    // _____#_##___"
+    //         .to_string()
+}
+pub fn gosper_glider_gun() -> Vec<String> {
+    [
+        ["_".repeat(24), "#".into(), "_".repeat(11)].concat(),
+        ["_".repeat(22), "#_#".into(), "_".repeat(11)].concat(),
+        [
+            "_".repeat(12),
+            "##______##".into(),
+            "_".repeat(12),
+            "##".into(),
+        ]
+        .concat(),
+        [
+            "_".repeat(11),
+            "#___#____##".into(),
+            "_".repeat(12),
+            "##".into(),
+        ]
+        .concat(),
+        [
+            "##".into(),
+            "_".repeat(8),
+            "#_____#___##".into(),
+            "_".repeat(14),
+        ]
+        .concat(),
+        [
+            "##".into(),
+            "_".repeat(8),
+            "#___#_##____#_#".into(),
+            "_".repeat(11),
+        ]
+        .concat(),
+        [
+            "_".repeat(10),
+            "#_____#".into(),
+            "_".repeat(7),
+            "#".into(),
+            "_".repeat(11),
+        ]
+        .concat(),
+        ["_".repeat(11), "#___#".into(), "_".repeat(20)].concat(),
+        ["_".repeat(12), "##".into(), "_".repeat(22)].concat(),
+    ]
+    .to_vec()
+}
+pub fn sir_robin() -> String {
+    todo!()
+}
+pub fn snark_loop() -> String {
     todo!()
 }
 
-fn copperhead() -> String {
-    "_____#_##___
-____#______#
-___##___#__#
-##_#_____##_
-##_#_____##_
-___##___#__#
-____#______#
-_____#_##___"
-        .to_string()
-}
-fn gosper_glider_gun() -> String {
-    todo!()
-}
-fn sir_robin() -> String {
-    todo!()
-}
-fn snark_loop() -> String {
-    todo!()
+pub fn featherweigth_spaceship() -> Vec<String> {
+    ["__#".into(), "#_#".into(), "_##".into()].to_vec()
 }
