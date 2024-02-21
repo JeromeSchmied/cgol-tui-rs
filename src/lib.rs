@@ -10,6 +10,7 @@ pub enum Cell {
 }
 
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct Universe {
     width: u32,
     height: u32,
@@ -37,6 +38,29 @@ impl Universe {
             }
         }
         sum
+    }
+
+    fn from_str(s: &str) -> Self {
+        let mut height = 1;
+        let mut cells = Vec::new();
+
+        for ch in s.chars() {
+            if ch == '#' || ch == '1' {
+                cells.push(Cell::Alive);
+            } else if ch == '_' || ch == ' ' || ch == '0' {
+                cells.push(Cell::Dead);
+            } else if ch == '\n' {
+                height += 1;
+            } else {
+                eprintln!("Can't do nothing with this character: {}", ch);
+            }
+        }
+
+        Universe {
+            width: s.len() as u32 / height,
+            height,
+            cells,
+        }
     }
 }
 
@@ -90,12 +114,51 @@ impl Universe {
                 }
             })
             .collect();
-
         Universe {
             width,
             height,
             cells,
         }
+    }
+
+    pub fn new_figur(width: u32, height: u32) -> Self {
+        dbg!(height);
+        dbg!(width);
+
+        // 8×12
+
+        // 64-8 = 56 => 28:row
+        // 64-12 = 52 => 26:col
+
+        // 32-8 = 24 => 12:row
+        // 32-12 = 20 => 10:col
+
+        let figur = Universe::from_str(&copperhead());
+        dbg!(&figur);
+        println!("{}", &figur);
+
+        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
+        let mut uni = Universe {
+            cells,
+            width,
+            height,
+        };
+
+        let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
+        dbg!(start_row);
+        dbg!(start_col);
+        println!();
+
+        let mut j = 0;
+        for row in start_row as usize..start_row as usize + figur.height() as usize {
+            let idx = uni.get_index(row as u32, start_col);
+            for i in 0..figur.width() as usize {
+                uni.cells[idx + i] = figur.cells[j];
+                j += 1;
+            }
+        }
+
+        uni
     }
 
     pub fn render(&self) -> String {
@@ -137,4 +200,29 @@ impl fmt::Display for Universe {
         writeln!(f, "╰{}╯", "─".repeat(self.width as usize * 2))?;
         Ok(())
     }
+}
+
+fn two_engine_cordership() -> String {
+    todo!()
+}
+
+fn copperhead() -> String {
+    "_____#_##___
+____#______#
+___##___#__#
+##_#_____##_
+##_#_____##_
+___##___#__#
+____#______#
+_____#_##___"
+        .to_string()
+}
+fn gosper_glider_gun() -> String {
+    todo!()
+}
+fn sir_robin() -> String {
+    todo!()
+}
+fn snark_loop() -> String {
+    todo!()
 }
