@@ -20,6 +20,6 @@ fn main() {
         println!("{}", universe);
 
         // sleeping
-        std::thread::sleep(std::time::Duration::from_millis(80));
+        std::thread::sleep(std::time::Duration::from_millis(14));
     }
 }

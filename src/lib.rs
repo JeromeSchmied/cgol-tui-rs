@@ -1,5 +1,14 @@
 use wasm_bindgen::prelude::*;
-// extern crate js_sys;
+
+// extern crate web_sys;
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+// macro_rules! log {
+//     ( $( $t:tt )* ) => {
+//         web_sys::console::log_1(&format!( $( $t )* ).into());
+//     }
+// }
+
+// mod utils;
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -114,6 +123,7 @@ impl Universe {
     }
 
     pub fn new(width: u32, height: u32) -> Self {
+        // utils::set_panic_hook();
         let cells = (0..width * height)
             .map(|_i| {
                 if
