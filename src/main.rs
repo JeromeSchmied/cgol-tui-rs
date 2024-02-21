@@ -7,7 +7,7 @@ fn main() {
     //     38×38 max: 190
     let n = 8000;
 
-    let mut universe = Universe::from_figur(32, 32, &featherweigth_spaceship());
+    let mut universe = Universe::from_figur(32, 32, featherweigth_spaceship());
 
     // println!("{}", universe);
 

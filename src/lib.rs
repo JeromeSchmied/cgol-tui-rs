@@ -40,10 +40,10 @@ impl Universe {
         sum
     }
 
-    fn from_vec_str(s: &[String]) -> Self {
+    fn from_vec_str(s: Vec<String>) -> Self {
         let mut cells = Vec::new();
 
-        for line in s {
+        for line in &s {
             for ch in line.chars() {
                 if ch == '#' || ch == '1' {
                     cells.push(Cell::Alive);
@@ -60,39 +60,6 @@ impl Universe {
             height: s.len() as u32,
             cells,
         }
-    }
-    pub fn from_figur(width: u32, height: u32, figur: &[String]) -> Self {
-        dbg!(height);
-        dbg!(width);
-
-        let figur = Universe::from_vec_str(figur);
-        println!("{}", &figur);
-
-        assert!(height > figur.height());
-        assert!(width > figur.width());
-
-        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
-        let mut uni = Universe {
-            cells,
-            width,
-            height,
-        };
-
-        let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
-        dbg!(start_row);
-        dbg!(start_col);
-        println!();
-
-        let mut j = 0;
-        for row in start_row as usize..start_row as usize + figur.height() as usize {
-            let idx = uni.get_index(row as u32, start_col);
-            for i in 0..figur.width() as usize {
-                uni.cells[idx + i] = figur.cells[j];
-                j += 1;
-            }
-        }
-
-        uni
     }
 }
 
@@ -153,6 +120,40 @@ impl Universe {
         }
     }
 
+    pub fn from_figur(width: u32, height: u32, figur: Vec<String>) -> Self {
+        // dbg!(height);
+        // dbg!(width);
+
+        let figur = Universe::from_vec_str(figur);
+        println!("{}", &figur);
+
+        assert!(height > figur.height());
+        assert!(width > figur.width());
+
+        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
+        let mut uni = Universe {
+            cells,
+            width,
+            height,
+        };
+
+        let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
+        // dbg!(start_row);
+        // dbg!(start_col);
+        println!();
+
+        let mut j = 0;
+        for row in start_row as usize..start_row as usize + figur.height() as usize {
+            let idx = uni.get_index(row as u32, start_col);
+            for i in 0..figur.width() as usize {
+                uni.cells[idx + i] = figur.cells[j];
+                j += 1;
+            }
+        }
+
+        uni
+    }
+
     pub fn render(&self) -> String {
         self.to_string()
     }
@@ -194,6 +195,7 @@ impl fmt::Display for Universe {
     }
 }
 
+#[wasm_bindgen]
 pub fn two_engine_cordership() -> String {
     todo!();
     // [
@@ -209,6 +211,7 @@ pub fn two_engine_cordership() -> String {
     // .concat()
 }
 
+#[wasm_bindgen]
 pub fn copperhead() -> Vec<String> {
     // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
     [
@@ -222,16 +225,9 @@ pub fn copperhead() -> Vec<String> {
         "_____#_##___".to_owned(),
     ]
     .to_vec()
-    // "_____#_##___
-    // ____#______#
-    // ___##___#__#
-    // ##_#_____##_
-    // ##_#_____##_
-    // ___##___#__#
-    // ____#______#
-    // _____#_##___"
-    //         .to_string()
 }
+
+#[wasm_bindgen]
 pub fn gosper_glider_gun() -> Vec<String> {
     [
         ["_".repeat(24), "#".into(), "_".repeat(11)].concat(),
@@ -277,13 +273,18 @@ pub fn gosper_glider_gun() -> Vec<String> {
     ]
     .to_vec()
 }
+
+#[wasm_bindgen]
 pub fn sir_robin() -> String {
     todo!()
 }
+
+#[wasm_bindgen]
 pub fn snark_loop() -> String {
     todo!()
 }
 
+#[wasm_bindgen]
 pub fn featherweigth_spaceship() -> Vec<String> {
     ["__#".into(), "#_#".into(), "_##".into()].to_vec()
 }
