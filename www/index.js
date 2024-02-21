@@ -1,4 +1,10 @@
-import { Universe, Cell, featherweigth_spaceship } from "wasm-game-of-life";
+import {
+    Universe,
+    Cell,
+    featherweigth_spaceship,
+    gosper_glider_gun,
+    copperhead,
+} from "wasm-game-of-life";
 import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 
 const CELL_SIZE = 6; // px
@@ -8,7 +14,9 @@ const ALIVE_COLOR = "#000000";
 
 // Construct the universe, and get its width and height.
 // const universe = Universe.new(128, 128);
-const universe = Universe.from_figur(128, 128, featherweigth_spaceship());
+// const universe = Universe.from_figur(128, 128, featherweigth_spaceship());
+// const universe = Universe.from_figur(128, 128, gosper_glider_gun());
+const universe = Universe.from_figur(128, 128, copperhead());
 const width = universe.width();
 const height = universe.height();
 
