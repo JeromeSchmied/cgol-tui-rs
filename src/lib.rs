@@ -35,6 +35,7 @@ pub struct Universe {
 }
 
 impl Universe {
+    /// Convert (x;y) to index
     fn get_index(&self, row: u32, col: u32) -> usize {
         (row * self.width + col) as usize
     }
@@ -320,27 +321,6 @@ pub mod shapes {
     }
 
     #[wasm_bindgen]
-    pub fn random(width: u32, height: u32) -> Vec<String> {
-        (0..height)
-            .map(|_| {
-                (0..width)
-                    .map(|_i| {
-                        if
-                        /*i % 2 == 0 || i % 7 == 0*/
-                        fastrand::bool()
-                        /*js_sys::Math::random() < 0.5 */
-                        {
-                            '#'
-                        } else {
-                            '_'
-                        }
-                    })
-                    .collect::<String>()
-            })
-            .collect()
-    }
-
-    #[wasm_bindgen]
     pub fn rand(width: u32, height: u32) -> Universe {
         let cells = (0..width * height)
             .map(|_i| {
@@ -398,6 +378,7 @@ impl std::fmt::Display for ShapeError {
     }
 }
 
+/// Returns universe created from `i`. shape if exists
 pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
     if i > SHAPES_N as usize {
         return Err(ShapeError::OutOfRange);
@@ -476,4 +457,11 @@ pub mod kmaps {
     pub fn smaller() -> Vec<Event> {
         vec![Event::Key(KeyCode::Char('-').into())]
     }
+
+    // to use mouse to toggle cells, these can be useful:
+    // - terminal::size()
+    // - Mouse(Event)::Push(Left)
+    // - Drag(Left)
+    // - execute!(io::stdout(), (Enable/Disable)MouseCapture)
+    // - Cursor::position()
 }

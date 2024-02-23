@@ -20,23 +20,25 @@ fn main() -> io::Result<()> {
         println!("Error: {:?}\r", e);
     }
 
-    disable_raw_mode()
-}
+    disable_raw_mode()?;
 
-// if not randomly generated:
-//     64×64 max: 3500
-//     32×32 max: 80
-//     38×38 max: 190
+    Ok(())
+}
 
 use crossterm::{
     cursor::MoveTo,
     event::{poll, read},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
+    terminal::{
+        disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
+        LeaveAlternateScreen,
+    },
 };
 use std::{io, time::Duration};
 
 fn print_events() -> io::Result<()> {
+    execute!(io::stdout(), EnterAlternateScreen)?;
+
     // widht and height, as they're the same
     let mut wh = 38;
 
@@ -108,37 +110,37 @@ fn print_events() -> io::Result<()> {
                 } else {
                     i = 0;
                 }
-                if let Err(fig) = get_shape(wh - 1, i) {
-                    eprintln!("Couldn't switch to next shape: {}\r", fig);
-                    continue;
+                if let Ok(shape) = get_shape(wh, i) {
+                    universe = shape;
+                } else {
+                    eprintln!("Couldn't switch to next shape\r");
                 }
-                universe = get_shape(wh, i).unwrap();
             } else if kmaps::smaller().contains(&event) {
-                if let Err(fig) = get_shape(wh - 1, i) {
-                    eprintln!("Couldn't make smaller: {}", fig);
-                } else {
+                if let Ok(shape) = get_shape(wh - 1, i) {
+                    universe = shape;
                     wh -= 1;
-                }
-                universe = get_shape(wh, i).unwrap();
-            } else if kmaps::bigger().contains(&event) {
-                if let Err(fig) = get_shape(wh + 1, i) {
-                    eprintln!("Couldn't make larger: {}", fig);
                 } else {
-                    wh += 1;
+                    eprintln!("Couldn't make smaller");
                 }
-                universe = get_shape(wh, i).unwrap();
+            } else if kmaps::bigger().contains(&event) {
+                if let Ok(shape) = get_shape(wh + 1, i) {
+                    universe = shape;
+                    wh += 1;
+                } else {
+                    eprintln!("Couldn't make larger");
+                }
             } else {
                 println!("Unknown: Event::{:?}\r", event);
-                std::thread::sleep(DEFAULT_DUR * 4);
             }
         } else {
-            // Timeout expired, no event for 1s
-            // println!(".\r");
+            // Timeout expired, updating life state
             universe.tick();
             execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::FromCursorDown))?;
             println!("{}", universe);
         }
     }
+
+    execute!(io::stdout(), LeaveAlternateScreen)?;
 
     Ok(())
 }
