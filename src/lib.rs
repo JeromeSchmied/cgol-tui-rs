@@ -78,7 +78,27 @@ impl Universe {
             cells,
         }
     }
-
+    fn new_rand(width: u32, height: u32) -> Self {
+        // utils::set_panic_hook();
+        let cells = (0..width * height)
+            .map(|_i| {
+                if
+                /*i % 2 == 0 || i % 7 == 0*/
+                fastrand::bool()
+                /*js_sys::Math::random() < 0.5 */
+                {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect();
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
     /// Get the dead and alive values of the entire universe.
     pub fn get_cells(&self) -> &[Cell] {
         &self.cells
@@ -130,34 +150,12 @@ impl Universe {
         self.cells = next;
     }
 
-    pub fn new(width: u32, height: u32) -> Self {
-        // utils::set_panic_hook();
-        let cells = (0..width * height)
-            .map(|_i| {
-                if
-                /*i % 2 == 0 || i % 7 == 0*/
-                fastrand::bool()
-                /*js_sys::Math::random() < 0.5 */
-                {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
-        Universe {
-            width,
-            height,
-            cells,
-        }
-    }
-
     pub fn from_figur(width: u32, height: u32, figur: Vec<String>) -> Self {
         // dbg!(height);
         // dbg!(width);
 
         let figur = Universe::from_vec_str(figur);
-        println!("{}", &figur);
+        println!("{}\r", &figur);
 
         assert!(height > figur.height());
         assert!(width > figur.width());
@@ -172,7 +170,7 @@ impl Universe {
         let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
         // dbg!(start_row);
         // dbg!(start_col);
-        println!();
+        println!("\r");
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
@@ -226,7 +224,7 @@ impl Universe {
 
 impl Default for Universe {
     fn default() -> Self {
-        Self::new(64, 64)
+        Self::new_rand(64, 64)
     }
 }
 
@@ -234,110 +232,131 @@ use std::fmt;
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "╭{}╮", "─".repeat(self.width as usize * 2))?;
+        writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
         for line in self.cells.as_slice().chunks(self.width as usize) {
             write!(f, "│")?;
             for &cell in line {
                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
                 write!(f, "{} ", symbol)?;
             }
-            writeln!(f, "│")?;
+            writeln!(f, "│\r")?;
         }
-        writeln!(f, "╰{}╯", "─".repeat(self.width as usize * 2))?;
+        writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
         Ok(())
     }
 }
 
-#[wasm_bindgen]
-pub fn two_engine_cordership() -> String {
-    todo!();
-    // [
-    //     "_".repeat(19),
-    //     "##".into(),
-    //     "_".repeat(19),
-    //     "\n".into(),
-    //     "_".repeat(19),
-    //     "####".into(),
-    //     "_".repeat(17),
-    //     "\n".into(),
-    // ]
-    // .concat()
-}
+pub mod figures {
+    use super::*;
 
-#[wasm_bindgen]
-pub fn copperhead() -> Vec<String> {
-    // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
-    [
-        "_____#_##___".to_owned(),
-        "____#______#".to_owned(),
-        "___##___#__#".to_owned(),
-        "##_#_____##_".to_owned(),
-        "##_#_____##_".to_owned(),
-        "___##___#__#".to_owned(),
-        "____#______#".to_owned(),
-        "_____#_##___".to_owned(),
-    ]
-    .to_vec()
-}
+    #[wasm_bindgen]
+    pub fn two_engine_cordership() -> String {
+        todo!();
+        // [
+        //     "_".repeat(19),
+        //     "##".into(),
+        //     "_".repeat(19),
+        //     "\n".into(),
+        //     "_".repeat(19),
+        //     "####".into(),
+        //     "_".repeat(17),
+        //     "\n".into(),
+        // ]
+        // .concat()
+    }
 
-#[wasm_bindgen]
-pub fn gosper_glider_gun() -> Vec<String> {
-    [
-        ["_".repeat(24), "#".into(), "_".repeat(11)].concat(),
-        ["_".repeat(22), "#_#".into(), "_".repeat(11)].concat(),
+    #[wasm_bindgen]
+    pub fn copperhead() -> Vec<String> {
+        // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
         [
-            "_".repeat(12),
-            "##______##".into(),
-            "_".repeat(12),
-            "##".into(),
+            "_____#_##___".to_owned(),
+            "____#______#".to_owned(),
+            "___##___#__#".to_owned(),
+            "##_#_____##_".to_owned(),
+            "##_#_____##_".to_owned(),
+            "___##___#__#".to_owned(),
+            "____#______#".to_owned(),
+            "_____#_##___".to_owned(),
         ]
-        .concat(),
-        [
-            "_".repeat(11),
-            "#___#____##".into(),
-            "_".repeat(12),
-            "##".into(),
-        ]
-        .concat(),
-        [
-            "##".into(),
-            "_".repeat(8),
-            "#_____#___##".into(),
-            "_".repeat(14),
-        ]
-        .concat(),
-        [
-            "##".into(),
-            "_".repeat(8),
-            "#___#_##____#_#".into(),
-            "_".repeat(11),
-        ]
-        .concat(),
-        [
-            "_".repeat(10),
-            "#_____#".into(),
-            "_".repeat(7),
-            "#".into(),
-            "_".repeat(11),
-        ]
-        .concat(),
-        ["_".repeat(11), "#___#".into(), "_".repeat(20)].concat(),
-        ["_".repeat(12), "##".into(), "_".repeat(22)].concat(),
-    ]
-    .to_vec()
-}
+        .to_vec()
+    }
 
-#[wasm_bindgen]
-pub fn sir_robin() -> String {
-    todo!()
-}
+    #[wasm_bindgen]
+    pub fn gosper_glider_gun() -> Vec<String> {
+        [
+            ["_".repeat(24), "#".into(), "_".repeat(11)].concat(),
+            ["_".repeat(22), "#_#".into(), "_".repeat(11)].concat(),
+            [
+                "_".repeat(12),
+                "##______##".into(),
+                "_".repeat(12),
+                "##".into(),
+            ]
+            .concat(),
+            [
+                "_".repeat(11),
+                "#___#____##".into(),
+                "_".repeat(12),
+                "##".into(),
+            ]
+            .concat(),
+            [
+                "##".into(),
+                "_".repeat(8),
+                "#_____#___##".into(),
+                "_".repeat(14),
+            ]
+            .concat(),
+            [
+                "##".into(),
+                "_".repeat(8),
+                "#___#_##____#_#".into(),
+                "_".repeat(11),
+            ]
+            .concat(),
+            [
+                "_".repeat(10),
+                "#_____#".into(),
+                "_".repeat(7),
+                "#".into(),
+                "_".repeat(11),
+            ]
+            .concat(),
+            ["_".repeat(11), "#___#".into(), "_".repeat(20)].concat(),
+            ["_".repeat(12), "##".into(), "_".repeat(22)].concat(),
+        ]
+        .to_vec()
+    }
 
-#[wasm_bindgen]
-pub fn snark_loop() -> String {
-    todo!()
-}
+    #[wasm_bindgen]
+    pub fn sir_robin() -> String {
+        todo!()
+    }
 
-#[wasm_bindgen]
-pub fn featherweigth_spaceship() -> Vec<String> {
-    ["__#".into(), "#_#".into(), "_##".into()].to_vec()
+    #[wasm_bindgen]
+    pub fn snark_loop() -> String {
+        todo!()
+    }
+
+    #[wasm_bindgen]
+    pub fn featherweigth_spaceship() -> Vec<String> {
+        ["__#".into(), "#_#".into(), "_##".into()].to_vec()
+    }
+
+    #[wasm_bindgen]
+    pub fn random(width: u32, height: u32) -> Vec<Cell> {
+        (0..width * height)
+            .map(|_i| {
+                if
+                /*i % 2 == 0 || i % 7 == 0*/
+                fastrand::bool()
+                /*js_sys::Math::random() < 0.5 */
+                {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect()
+    }
 }

@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 # default = ["console_error_panic_hook"]
 
 [dependencies]
+crossterm = "0.27.0"
 fastrand = { version = "2.0.1", features = ["js"] }
 wasm-bindgen = "0.2.84"
 
