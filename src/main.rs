@@ -20,7 +20,7 @@ fn main() -> io::Result<()> {
 
 use crossterm::{
     cursor::MoveTo,
-    event::{poll, read, Event, KeyCode, KeyEvent, KeyModifiers},
+    event::{poll, read},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
 };
@@ -36,12 +36,21 @@ const HELP: &str = r#"Blocking poll() & non-blocking read()
 "#;
 
 fn print_events() -> io::Result<()> {
+    // widht and height, as they're the same
+    let mut wh = 38;
+    let mut i: usize = 0;
+    // let figures = vec![
+    //     figures::gosper_glider_gun(),
+    //     figures::featherweigth_spaceship(),
+    //     figures::copperhead(),
+    //     // random
+    //     // stripes should be here, but not good yet
+    // ];
     const DEFAULT_POLL: Duration = Duration::from_millis(400);
 
-    let (mut width, mut height) = (38, 38);
-    let mut is_figur = true;
-    let figur = figures::gosper_glider_gun();
-    let mut universe = Universe::from_figur(width, height, figur.clone());
+    // let mut universe = Universe::from_figur(wh, figures[i].clone());
+    let mut universe = figurás(wh, i).unwrap();
+    // let mut universe = figures::stripes(wh, wh);
 
     let mut stdout = io::stdout();
 
@@ -59,7 +68,7 @@ fn print_events() -> io::Result<()> {
                 println!("Quitting...\r");
                 break;
             } else if keymaps::slow_down().contains(&event) {
-                if poll_t < Duration::from_millis(100) {
+                if poll_t < Duration::from_millis(40) {
                     poll_t = poll_t
                         .checked_add(Duration::from_millis(1))
                         .unwrap_or(DEFAULT_POLL);
@@ -71,7 +80,7 @@ fn print_events() -> io::Result<()> {
 
                 println!("poll time is now: {:?}\r", poll_t);
             } else if keymaps::speed_up().contains(&event) {
-                if poll_t < Duration::from_millis(100) {
+                if poll_t < Duration::from_millis(40) {
                     poll_t = poll_t
                         .checked_sub(Duration::from_millis(1))
                         .unwrap_or(DEFAULT_POLL);
@@ -102,22 +111,39 @@ fn print_events() -> io::Result<()> {
                 }
                 paused = !paused;
             } else if keymaps::reset().contains(&event) {
-                if is_figur {
-                    universe = Universe::from_figur(width, height, figur.clone());
-                } else {
-                    universe = Universe::new_rand(width, height);
-                }
+                universe = figurás(wh, i).unwrap();
             } else if keymaps::next().contains(&event) {
-                is_figur = !is_figur;
-                universe = Universe::from_figur(width, height, figur.clone());
+                if i + 1 != FIG_NUM as usize {
+                    i += 1;
+                } else {
+                    i = 0;
+                }
+                // universe = Universe::from_figur(wh, figures[i].clone());
+                universe = figurás(wh, i).unwrap();
             } else if keymaps::smaller().contains(&event) {
-                height -= 1;
-                width -= 1;
-                universe = Universe::from_figur(width, height, figur.clone());
+                if let Err(fig) = figurás(wh - 1, i) {
+                    eprintln!("Couldn't make smaller: {}", fig);
+                } else {
+                    wh -= 1;
+                }
+                universe = figurás(wh, i).unwrap();
+                // if i == figures.len() {
+                //     universe = figures::rand(wh, wh);
+                // } else {
+                //     universe = Universe::from_figur(wh, figures[i].clone());
+                // }
             } else if keymaps::bigger().contains(&event) {
-                height += 1;
-                width += 1;
-                universe = Universe::from_figur(width, height, figur.clone());
+                if let Err(fig) = figurás(wh + 1, i) {
+                    eprintln!("Couldn't make larger: {}", fig);
+                } else {
+                    wh += 1;
+                }
+                universe = figurás(wh, i).unwrap();
+                // if i == figures.len() {
+                //     universe = figures::rand(wh, wh);
+                // } else {
+                //     universe = Universe::from_figur(wh, figures[i].clone());
+                // }
             } else {
                 println!("Unknown: Event::{:?}\r", event);
             }
@@ -132,61 +158,4 @@ fn print_events() -> io::Result<()> {
     }
 
     Ok(())
-}
-
-mod keymaps {
-    use super::*;
-
-    pub fn play_pause() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char(' ').into())]
-    }
-
-    pub fn speed_up_big() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Char('J').into()),
-            Event::Key(KeyEvent::new(KeyCode::Down, KeyModifiers::SHIFT)),
-        ]
-    }
-    pub fn speed_up() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Char('j').into()),
-            Event::Key(KeyCode::Down.into()),
-        ]
-    }
-
-    pub fn slow_down_big() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Char('K').into()),
-            Event::Key(KeyEvent::new(KeyCode::Up, KeyModifiers::SHIFT)),
-        ]
-    }
-    pub fn slow_down() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Char('k').into()),
-            Event::Key(KeyCode::Up.into()),
-        ]
-    }
-
-    pub fn quit() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Esc.into()),
-            Event::Key(KeyCode::Char('q').into()),
-            Event::Key(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)),
-        ]
-    }
-
-    pub fn reset() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('R').into())]
-    }
-
-    pub fn next() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('n').into())]
-    }
-
-    pub fn bigger() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('+').into())]
-    }
-    pub fn smaller() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('-').into())]
-    }
 }

@@ -78,7 +78,7 @@ impl Universe {
             cells,
         }
     }
-    fn new_rand(width: u32, height: u32) -> Self {
+    pub fn new_rand(width: u32, height: u32) -> Self {
         // utils::set_panic_hook();
         let cells = (0..width * height)
             .map(|_i| {
@@ -111,6 +111,42 @@ impl Universe {
             let idx = self.get_index(row, col);
             self.cells[idx] = Cell::Alive;
         }
+    }
+    pub fn from_figur(wh: u32, figur: Vec<String>) -> Result<Universe, FigurasError> {
+        // dbg!(height);
+        // dbg!(width);
+
+        let figur = Universe::from_vec_str(figur);
+        println!("{}\r", &figur);
+
+        if wh < figur.height() || wh < figur.width() {
+            return Err(FigurasError::TooBig);
+        }
+        // assert!(wh > figur.height());
+        // assert!(wh > figur.width());
+
+        let cells = (0..wh * wh).map(|_i| Cell::Dead).collect();
+        let mut uni = Universe {
+            cells,
+            width: wh,
+            height: wh,
+        };
+
+        let (start_row, start_col) = ((wh - figur.height()) / 2, (wh - figur.width()) / 2);
+        // dbg!(start_row);
+        // dbg!(start_col);
+        println!("\r");
+
+        let mut j = 0;
+        for row in start_row as usize..start_row as usize + figur.height() as usize {
+            let idx = uni.get_index(row as u32, start_col);
+            for i in 0..figur.width() as usize {
+                uni.cells[idx + i] = figur.cells[j];
+                j += 1;
+            }
+        }
+
+        Ok(uni)
     }
 }
 
@@ -148,40 +184,6 @@ impl Universe {
         }
 
         self.cells = next;
-    }
-
-    pub fn from_figur(width: u32, height: u32, figur: Vec<String>) -> Self {
-        // dbg!(height);
-        // dbg!(width);
-
-        let figur = Universe::from_vec_str(figur);
-        println!("{}\r", &figur);
-
-        assert!(height > figur.height());
-        assert!(width > figur.width());
-
-        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
-        let mut uni = Universe {
-            cells,
-            width,
-            height,
-        };
-
-        let (start_row, start_col) = ((height - figur.height()) / 2, (width - figur.width()) / 2);
-        // dbg!(start_row);
-        // dbg!(start_col);
-        println!("\r");
-
-        let mut j = 0;
-        for row in start_row as usize..start_row as usize + figur.height() as usize {
-            let idx = uni.get_index(row as u32, start_col);
-            for i in 0..figur.width() as usize {
-                uni.cells[idx + i] = figur.cells[j];
-                j += 1;
-            }
-        }
-
-        uni
     }
 
     pub fn render(&self) -> String {
@@ -344,8 +346,29 @@ pub mod figures {
     }
 
     #[wasm_bindgen]
-    pub fn random(width: u32, height: u32) -> Vec<Cell> {
-        (0..width * height)
+    pub fn random(width: u32, height: u32) -> Vec<String> {
+        (0..height)
+            .map(|_| {
+                (0..width)
+                    .map(|_i| {
+                        if
+                        /*i % 2 == 0 || i % 7 == 0*/
+                        fastrand::bool()
+                        /*js_sys::Math::random() < 0.5 */
+                        {
+                            '#'
+                        } else {
+                            '_'
+                        }
+                    })
+                    .collect::<String>()
+            })
+            .collect()
+    }
+
+    #[wasm_bindgen]
+    pub fn rand(width: u32, height: u32) -> Universe {
+        let cells = (0..width * height)
             .map(|_i| {
                 if
                 /*i % 2 == 0 || i % 7 == 0*/
@@ -357,6 +380,127 @@ pub mod figures {
                     Cell::Dead
                 }
             })
-            .collect()
+            .collect();
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn stripes(width: u32, height: u32) -> Universe {
+        let cells = (0..width * height)
+            .map(|i| {
+                if i % 2 == 0 || i % 7 == 0
+                // fastrand::bool()
+                /*js_sys::Math::random() < 0.5 */
+                {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect();
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+}
+
+pub const FIG_NUM: u8 = 5;
+
+#[derive(Debug)]
+pub enum FigurasError {
+    OutOfRange,
+    TooBig,
+}
+impl std::fmt::Display for FigurasError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            FigurasError::OutOfRange => write!(f, "index out of range"),
+            FigurasError::TooBig => write!(f, "display area not big enough for this shape"),
+        }
+    }
+}
+
+pub fn figurás(wh: u32, i: usize) -> Result<Universe, FigurasError> {
+    if i > FIG_NUM as usize {
+        return Err(FigurasError::OutOfRange);
+    }
+
+    match i {
+        0 => Universe::from_figur(wh, figures::featherweigth_spaceship()),
+
+        1 => Universe::from_figur(wh, figures::copperhead()),
+
+        2 => Universe::from_figur(wh, figures::gosper_glider_gun()),
+
+        3 => Ok(figures::stripes(wh, wh)),
+
+        4 => Ok(figures::rand(wh, wh)),
+
+        _ => Err(FigurasError::OutOfRange),
+    }
+    // todo!();
+    // Ok()
+}
+
+pub mod keymaps {
+    use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
+
+    pub fn play_pause() -> Vec<Event> {
+        vec![Event::Key(KeyCode::Char(' ').into())]
+    }
+
+    pub fn speed_up_big() -> Vec<Event> {
+        vec![
+            Event::Key(KeyCode::Char('J').into()),
+            Event::Key(KeyEvent::new(KeyCode::Down, KeyModifiers::SHIFT)),
+        ]
+    }
+    pub fn speed_up() -> Vec<Event> {
+        vec![
+            Event::Key(KeyCode::Char('j').into()),
+            Event::Key(KeyCode::Down.into()),
+        ]
+    }
+
+    pub fn slow_down_big() -> Vec<Event> {
+        vec![
+            Event::Key(KeyCode::Char('K').into()),
+            Event::Key(KeyEvent::new(KeyCode::Up, KeyModifiers::SHIFT)),
+        ]
+    }
+    pub fn slow_down() -> Vec<Event> {
+        vec![
+            Event::Key(KeyCode::Char('k').into()),
+            Event::Key(KeyCode::Up.into()),
+        ]
+    }
+
+    pub fn quit() -> Vec<Event> {
+        vec![
+            Event::Key(KeyCode::Esc.into()),
+            Event::Key(KeyCode::Char('q').into()),
+            Event::Key(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)),
+        ]
+    }
+
+    pub fn reset() -> Vec<Event> {
+        vec![Event::Key(KeyCode::Char('R').into())]
+    }
+
+    pub fn next() -> Vec<Event> {
+        vec![Event::Key(KeyCode::Char('n').into())]
+    }
+
+    pub fn bigger() -> Vec<Event> {
+        vec![Event::Key(KeyCode::Char('+').into())]
+    }
+    pub fn smaller() -> Vec<Event> {
+        vec![Event::Key(KeyCode::Char('-').into())]
     }
 }
