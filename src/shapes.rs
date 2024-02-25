@@ -1,19 +1,7 @@
 use super::*;
 
-pub fn two_engine_cordership() -> String {
-    todo!();
-    // [
-    //     "_".repeat(19),
-    //     "##".into(),
-    //     "_".repeat(19),
-    //     "\n".into(),
-    //     "_".repeat(19),
-    //     "####".into(),
-    //     "_".repeat(17),
-    //     "\n".into(),
-    // ]
-    // .concat()
-}
+/// Number of currently supported shapes
+pub const N: u8 = 7;
 
 pub fn copperhead() -> Vec<String> {
     // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
@@ -76,14 +64,6 @@ pub fn gosper_glider_gun() -> Vec<String> {
     .to_vec()
 }
 
-pub fn sir_robin() -> String {
-    todo!()
-}
-
-pub fn snark_loop() -> String {
-    todo!()
-}
-
 pub fn featherweigth_spaceship() -> Vec<String> {
     ["__#".into(), "#_#".into(), "_##".into()].to_vec()
 }
@@ -94,6 +74,18 @@ pub fn rabbits() -> Vec<String> {
         "__#___#_".into(),
         "__#__#_#".into(),
         "_#_#____".into(),
+    ]
+    .to_vec()
+}
+
+/// 3×5
+pub fn bonk_tie() -> Vec<String> {
+    [
+        "##_".into(),
+        "##_".into(),
+        "__#".into(),
+        "__#".into(),
+        "__#".into(),
     ]
     .to_vec()
 }
@@ -134,4 +126,27 @@ pub fn stripes(width: u32, height: u32) -> Universe {
         height,
         cells,
     }
+}
+
+pub fn two_engine_cordership() -> String {
+    todo!();
+    // [
+    //     "_".repeat(19),
+    //     "##".into(),
+    //     "_".repeat(19),
+    //     "\n".into(),
+    //     "_".repeat(19),
+    //     "####".into(),
+    //     "_".repeat(17),
+    //     "\n".into(),
+    // ]
+    // .concat()
+}
+
+pub fn sir_robin() -> String {
+    todo!()
+}
+
+pub fn snark_loop() -> String {
+    todo!()
 }

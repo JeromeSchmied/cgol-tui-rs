@@ -186,9 +186,6 @@ impl fmt::Display for Universe {
     }
 }
 
-/// Number of currently supported shapes
-pub const SHAPES_N: u8 = 6;
-
 #[derive(Debug)]
 pub enum ShapeError {
     OutOfRange,
@@ -210,7 +207,7 @@ impl std::fmt::Display for ShapeError {
 /// `from_figur()`
 /// `IndexOutOfRange`
 pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
-    if i > SHAPES_N as usize {
+    if i > shapes::N as usize {
         return Err(ShapeError::OutOfRange);
     }
 
@@ -226,6 +223,8 @@ pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
         4 => Ok(shapes::rand(wh, wh)),
 
         5 => Universe::from_figur(wh, &shapes::rabbits()),
+
+        6 => Universe::from_figur(wh, &shapes::bonk_tie()),
 
         _ => Err(ShapeError::OutOfRange),
     }

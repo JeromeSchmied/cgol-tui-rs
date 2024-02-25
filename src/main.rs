@@ -110,7 +110,7 @@ fn print_events() -> io::Result<()> {
             } else if kmaps::restart().contains(&event) {
                 universe = get_shape(wh, i).unwrap();
             } else if kmaps::next().contains(&event) {
-                if i + 1 != SHAPES_N as usize {
+                if i + 1 != shapes::N as usize {
                     i += 1;
                 } else {
                     i = 0;
