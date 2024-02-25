@@ -86,11 +86,21 @@ impl Universe {
 
     /// Create universe with width, height: inserting starting shape into the middle
     ///
+    /// # Buggy!
+    ///
+    /// doesn't work properly for blonk-tie, banana-spark, bunnies
+    ///
     /// # Errors
     ///
     /// if shape can't fit universe
     pub fn from_figur(wh: u32, figur: &[String]) -> Result<Universe, ShapeError> {
         let figur = Universe::from_vec_str(figur);
+        let figur_alive = figur
+            .cells
+            .iter()
+            .filter(|cell| cell == &&Cell::Alive)
+            .count();
+
         println!("{}\r", &figur);
 
         if wh < figur.height() || wh < figur.width() {
@@ -98,7 +108,7 @@ impl Universe {
         }
 
         let cells = (0..wh * wh).map(|_i| Cell::Dead).collect();
-        let mut uni = Universe {
+        let mut univ = Universe {
             cells,
             width: wh,
             height: wh,
@@ -109,14 +119,23 @@ impl Universe {
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
-            let idx = uni.get_index(row as u32, start_col);
+            let idx = univ.get_index(row as u32, start_col);
             for i in 0..figur.width() as usize {
-                uni.cells[idx + i] = figur.cells[j];
+                univ.cells[idx + i] = figur.cells[j];
                 j += 1;
             }
         }
 
-        Ok(uni)
+        let univ_alive = univ
+            .cells
+            .iter()
+            .filter(|cell| cell == &&Cell::Alive)
+            .count();
+        if figur_alive == univ_alive {
+            Ok(univ)
+        } else {
+            Err(ShapeError::Other)
+        }
     }
 
     /// update life: `Universe`
@@ -190,14 +209,7 @@ impl fmt::Display for Universe {
 pub enum ShapeError {
     OutOfRange,
     TooBig,
-}
-impl std::fmt::Display for ShapeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
-            ShapeError::OutOfRange => write!(f, "index out of range"),
-            ShapeError::TooBig => write!(f, "display area not big enough for this shape"),
-        }
-    }
+    Other,
 }
 
 /// Returns universe created from `i`. shape if exists
@@ -225,6 +237,8 @@ pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
         5 => Universe::from_figur(wh, &shapes::rabbits()),
 
         6 => Universe::from_figur(wh, &shapes::bonk_tie()),
+
+        7 => Universe::from_figur(wh, &shapes::banana_spark()),
 
         _ => Err(ShapeError::OutOfRange),
     }

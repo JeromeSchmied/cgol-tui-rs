@@ -1,7 +1,7 @@
 use super::*;
 
 /// Number of currently supported shapes
-pub const N: u8 = 7;
+pub const N: u8 = 8;
 
 pub fn copperhead() -> Vec<String> {
     // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
@@ -88,6 +88,11 @@ pub fn bonk_tie() -> Vec<String> {
         "__#".into(),
     ]
     .to_vec()
+}
+
+/// 2×3
+pub fn banana_spark() -> Vec<String> {
+    ["#_".into(), "_#".into(), "_#".into()].to_vec()
 }
 
 pub fn rand(width: u32, height: u32) -> Universe {
