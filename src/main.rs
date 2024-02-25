@@ -16,6 +16,7 @@ fn main() -> io::Result<()> {
 }
 
 use crossterm::{
+    cursor::MoveTo,
     event::{poll, read},
     execute,
     terminal::{
@@ -30,14 +31,6 @@ fn print_events() -> io::Result<()> {
 
     let mut app = App::default();
 
-    // widht and height, as they're the same
-    // let mut wh = DEF_WH;
-
-    // let mut i: usize = 0;
-    // let mut universe = shapes::get(wh, i).unwrap();
-
-    // let mut poll_t = DEF_DUR;
-    // let mut paused = false;
     let mut prev_poll_t = app.poll_t();
 
     loop {
@@ -89,8 +82,8 @@ fn print_events() -> io::Result<()> {
             }
         } else {
             // Timeout expired, updating life state
-            execute!(io::stdout(), Clear(ClearType::All))?;
-            println!("{}", app.render_universe());
+            execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::All))?;
+            app.render_universe();
             app.tick();
         }
     }

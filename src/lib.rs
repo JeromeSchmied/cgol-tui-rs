@@ -234,8 +234,8 @@ impl App {
     pub fn poll_t(&self) -> Duration {
         self.poll_t
     }
-    pub fn render_universe(&self) -> String {
-        self.universe.to_string()
+    pub fn render_universe(&self) {
+        println!("{}", self.universe);
     }
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
