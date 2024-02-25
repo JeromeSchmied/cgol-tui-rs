@@ -4,6 +4,10 @@
 
 clone the repo and run `cargo r`
 
+## Sample
+
+![Sample][1]
+
 ## License
 
 Licensed under either of
@@ -19,3 +23,5 @@ Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
 conditions.
+
+[1]: assets/0.1.0_gosper_glider_gun.png "Image of using cgol-cli-rs in Alacritty on Arch Linux"
