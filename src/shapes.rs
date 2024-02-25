@@ -3,6 +3,45 @@ use super::*;
 /// Number of currently supported shapes
 pub const N: u8 = 8;
 
+#[derive(Debug)]
+pub enum HandleError {
+    OutOfRange,
+    TooBig,
+    Other,
+}
+
+/// Returns universe created from `i`. shape if exists
+///
+/// # Errors
+///
+/// `from_figur()`
+/// `IndexOutOfRange`
+pub fn get(wh: u32, i: usize) -> Result<Universe, HandleError> {
+    if i > shapes::N as usize {
+        return Err(HandleError::OutOfRange);
+    }
+
+    match i {
+        0 => Universe::from_figur(wh, &shapes::featherweigth_spaceship()),
+
+        1 => Universe::from_figur(wh, &shapes::copperhead()),
+
+        2 => Universe::from_figur(wh, &shapes::gosper_glider_gun()),
+
+        3 => Ok(shapes::stripes(wh, wh)),
+
+        4 => Ok(shapes::rand(wh, wh)),
+
+        5 => Universe::from_figur(wh, &shapes::rabbits()),
+
+        6 => Universe::from_figur(wh, &shapes::bonk_tie()),
+
+        7 => Universe::from_figur(wh, &shapes::acorn()),
+
+        _ => Err(HandleError::OutOfRange),
+    }
+}
+
 pub fn copperhead() -> Vec<String> {
     // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
     [
@@ -98,11 +137,7 @@ pub fn acorn() -> Vec<String> {
 pub fn rand(width: u32, height: u32) -> Universe {
     let cells = (0..width * height)
         .map(|_i| {
-            if
-            /*i % 2 == 0 || i % 7 == 0*/
-            fastrand::bool()
-            /*js_sys::Math::random() < 0.5 */
-            {
+            if fastrand::bool() {
                 Cell::Alive
             } else {
                 Cell::Dead

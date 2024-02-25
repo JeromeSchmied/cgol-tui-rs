@@ -36,7 +36,7 @@ fn print_events() -> io::Result<()> {
     let mut wh = DEF_WH;
 
     let mut i: usize = 0;
-    let mut universe = get_shape(wh, i).unwrap();
+    let mut universe = shapes::get(wh, i).unwrap();
 
     let mut poll_t = DEF_DUR;
     let mut paused = false;
@@ -83,20 +83,20 @@ fn print_events() -> io::Result<()> {
                 }
                 paused = !paused;
             } else if kmaps::restart().contains(&event) {
-                universe = get_shape(wh, i).unwrap();
+                universe = shapes::get(wh, i).unwrap();
             } else if kmaps::next().contains(&event) {
                 next(&mut i, wh, &mut universe);
             } else if kmaps::prev().contains(&event) {
                 prev(&mut i, wh, &mut universe);
             } else if kmaps::smaller().contains(&event) {
-                if let Ok(shape) = get_shape(wh - 1, i) {
+                if let Ok(shape) = shapes::get(wh - 1, i) {
                     universe = shape;
                     wh -= 1;
                 } else {
                     eprintln!("Couldn't make smaller");
                 }
             } else if kmaps::bigger().contains(&event) {
-                if let Ok(shape) = get_shape(wh + 1, i) {
+                if let Ok(shape) = shapes::get(wh + 1, i) {
                     universe = shape;
                 }
                 wh += 1;
@@ -106,7 +106,7 @@ fn print_events() -> io::Result<()> {
                 wh = DEF_WH;
                 poll_t = DEF_DUR;
                 prev_poll_t = poll_t;
-                universe = get_shape(wh, i).unwrap();
+                universe = shapes::get(wh, i).unwrap();
             } else {
                 eprintln!("Unknown event: {event:?}\r");
             }

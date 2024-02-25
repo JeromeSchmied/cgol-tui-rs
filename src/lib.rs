@@ -14,6 +14,9 @@ pub const HELP: &str = r#"Blocking poll() & non-blocking read()
  - and now, press Enter to continue
 "#;
 
+/// Keymaps to handle input events
+pub mod kmaps;
+/// Starting shapes
 pub mod shapes;
 
 /// information about one `Cell`: either `Dead` or `Alive`
@@ -91,7 +94,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(wh: u32, figur: &[String]) -> Result<Universe, ShapeError> {
+    pub fn from_figur(wh: u32, figur: &[String]) -> Result<Universe, HandleError> {
         let figur = Universe::from_vec_str(figur);
         let figur_alive = figur
             .cells
@@ -102,7 +105,7 @@ impl Universe {
         println!("{}\r", &figur);
 
         if wh < figur.height() || wh < figur.width() {
-            return Err(ShapeError::TooBig);
+            return Err(HandleError::TooBig);
         }
 
         let cells = (0..wh * wh).map(|_i| Cell::Dead).collect();
@@ -132,7 +135,7 @@ impl Universe {
         if figur_alive == univ_alive {
             Ok(univ)
         } else {
-            Err(ShapeError::Other)
+            Err(HandleError::Other)
         }
     }
 
@@ -187,6 +190,8 @@ impl Universe {
 
 use std::{fmt, time::Duration};
 
+use crate::shapes::HandleError;
+
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
@@ -200,111 +205,6 @@ impl fmt::Display for Universe {
         }
         writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
         Ok(())
-    }
-}
-
-#[derive(Debug)]
-pub enum ShapeError {
-    OutOfRange,
-    TooBig,
-    Other,
-}
-
-/// Returns universe created from `i`. shape if exists
-///
-/// # Errors
-///
-/// `from_figur()`
-/// `IndexOutOfRange`
-pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
-    if i > shapes::N as usize {
-        return Err(ShapeError::OutOfRange);
-    }
-
-    match i {
-        0 => Universe::from_figur(wh, &shapes::featherweigth_spaceship()),
-
-        1 => Universe::from_figur(wh, &shapes::copperhead()),
-
-        2 => Universe::from_figur(wh, &shapes::gosper_glider_gun()),
-
-        3 => Ok(shapes::stripes(wh, wh)),
-
-        4 => Ok(shapes::rand(wh, wh)),
-
-        5 => Universe::from_figur(wh, &shapes::rabbits()),
-
-        6 => Universe::from_figur(wh, &shapes::bonk_tie()),
-
-        7 => Universe::from_figur(wh, &shapes::acorn()),
-
-        _ => Err(ShapeError::OutOfRange),
-    }
-    // todo!();
-    // Ok()
-}
-
-/// Keymaps to handle input events
-pub mod kmaps {
-    use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
-
-    /// Create Event from ch
-    fn ch_to_event(ch: char) -> Event {
-        Event::Key(KeyCode::Char(ch).into())
-    }
-
-    pub fn play_pause() -> Vec<Event> {
-        vec![ch_to_event(' ')]
-    }
-
-    pub fn slower() -> Vec<Event> {
-        vec![ch_to_event('j'), Event::Key(KeyCode::Down.into())]
-    }
-    pub fn slower_big() -> Vec<Event> {
-        vec![
-            ch_to_event('J'),
-            Event::Key(KeyEvent::new(KeyCode::Down, KeyModifiers::SHIFT)),
-        ]
-    }
-
-    pub fn faster() -> Vec<Event> {
-        vec![ch_to_event('k'), Event::Key(KeyCode::Up.into())]
-    }
-    pub fn faster_big() -> Vec<Event> {
-        vec![
-            ch_to_event('K'),
-            Event::Key(KeyEvent::new(KeyCode::Up, KeyModifiers::SHIFT)),
-        ]
-    }
-
-    pub fn quit() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Esc.into()),
-            ch_to_event('q'),
-            Event::Key(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)),
-        ]
-    }
-
-    pub fn restart() -> Vec<Event> {
-        vec![ch_to_event('r')]
-    }
-
-    pub fn reset() -> Vec<Event> {
-        vec![ch_to_event('R')]
-    }
-
-    pub fn next() -> Vec<Event> {
-        vec![ch_to_event('n')]
-    }
-    pub fn prev() -> Vec<Event> {
-        vec![ch_to_event('p')]
-    }
-
-    pub fn bigger() -> Vec<Event> {
-        vec![ch_to_event('+')]
-    }
-    pub fn smaller() -> Vec<Event> {
-        vec![ch_to_event('-')]
     }
 }
 
@@ -328,7 +228,7 @@ pub fn next(i: &mut usize, wh: u32, universe: &mut Universe) {
     } else {
         *i = 0;
     }
-    if let Ok(shape) = get_shape(wh, *i) {
+    if let Ok(shape) = shapes::get(wh, *i) {
         *universe = shape;
     } else {
         eprintln!("Couldn't switch to next shape\r");
@@ -341,7 +241,7 @@ pub fn prev(i: &mut usize, wh: u32, universe: &mut Universe) {
     } else {
         *i = shapes::N as usize - 1;
     }
-    if let Ok(shape) = get_shape(wh, *i) {
+    if let Ok(shape) = shapes::get(wh, *i) {
         *universe = shape;
     } else {
         eprintln!("Couldn't switch to previous shape\r");
