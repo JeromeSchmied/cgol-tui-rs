@@ -1,7 +1,6 @@
-use wasm_game_of_life::*;
+use conways_game_of_life_cli_rs::*;
 
 const HELP: &str = r#"Blocking poll() & non-blocking read()
- - Keyboard, mouse and terminal resize events enabled
  - Prints current state of Conway's Game of Life if there's no event
  - Use Esc or `q` to quit
  - `j`, `k`: decreasing, increasing speed
@@ -34,10 +33,16 @@ use crossterm::{
         LeaveAlternateScreen,
     },
 };
-use std::{io, time::Duration};
+use std::{
+    io::{self},
+    time::Duration,
+};
 
 fn print_events() -> io::Result<()> {
-    execute!(io::stdout(), EnterAlternateScreen)?;
+    execute!(
+        io::stdout(),
+        EnterAlternateScreen /*, EnableMouseCapture*/
+    )?;
 
     // widht and height, as they're the same
     let mut wh = 38;
@@ -58,6 +63,7 @@ fn print_events() -> io::Result<()> {
 
             if kmaps::quit().contains(&event) {
                 println!("Quitting...\r");
+                // queue!(io::stdout(), Print("Quitting..."))?;
                 break;
             } else if kmaps::slower().contains(&event) {
                 if poll_t < Duration::from_millis(40) {
@@ -69,7 +75,7 @@ fn print_events() -> io::Result<()> {
                         .checked_add(Duration::from_millis(10))
                         .unwrap_or(DEFAULT_DUR);
                 }
-
+                // queue!(io::stdout(), Print("Poll time is now"))?;
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::faster().contains(&event) {
                 if poll_t < Duration::from_millis(40) {
@@ -129,8 +135,37 @@ fn print_events() -> io::Result<()> {
                 } else {
                     eprintln!("Couldn't make larger");
                 }
+            // } else if event == MouseEventKind::Down(MouseButton::Left.into()) {
+            // } else if event == Event::Mouse(MouseEvent { kind, column , row , modifiers  }) {
+            // } else {
+            // println!("Unknown: Event::{:?}\r", event);
             } else {
-                println!("Unknown: Event::{:?}\r", event);
+                // match event {
+                //     crossterm::event::Event::FocusGained => eprintln!("Focus Gained."),
+                //     crossterm::event::Event::FocusLost => eprintln!("Focus Lost."),
+                //     crossterm::event::Event::Key(k) => {
+                //         eprintln!("Unknown key: {:?}", k);
+                //     }
+                //     crossterm::event::Event::Mouse(m) => {
+                //         if m.kind == MouseEventKind::Up(MouseButton::Left)
+                //             || m.kind == MouseEventKind::Drag(MouseButton::Left)
+                //         {
+                //             // eprintln!("row: {}, col: {}\r", m.row - 1, m.column - 1);
+                //             std::thread::sleep(DEFAULT_DUR);
+                //             if m.row > 0
+                //                 && m.row <= universe.height() as u16
+                //                 && m.column > 0
+                //                 && m.column < universe.width() as u16
+                //             {
+                //                 universe.toggle_cell((m.row - 1).into(), (m.column - 1).into());
+                //             }
+                //             println!("{}", universe);
+                //         }
+                //     }
+                //     crossterm::event::Event::Paste(_) => eprintln!("Paste"),
+                //     crossterm::event::Event::Resize(_, _) => eprintln!("Resize"),
+                // }
+                eprintln!("Unknown event: {:?}", event);
             }
         } else {
             // Timeout expired, updating life state
@@ -138,9 +173,13 @@ fn print_events() -> io::Result<()> {
             execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::FromCursorDown))?;
             println!("{}", universe);
         }
+        // io::stdout().flush()?;
     }
 
-    execute!(io::stdout(), LeaveAlternateScreen)?;
+    execute!(
+        io::stdout(),
+        LeaveAlternateScreen /*, DisableMouseCapture*/
+    )?;
 
     Ok(())
 }

@@ -1,17 +1,3 @@
-use wasm_bindgen::prelude::*;
-
-// extern crate web_sys;
-// A macro to provide `println!(..)`-style syntax for `console.log` logging.
-// macro_rules! log {
-//     ( $( $t:tt )* ) => {
-//         web_sys::console::log_1(&format!( $( $t )* ).into());
-//     }
-// }
-
-// mod utils;
-
-#[wasm_bindgen]
-#[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
     Dead = 0,
@@ -26,7 +12,6 @@ impl Cell {
     }
 }
 
-#[wasm_bindgen]
 #[derive(Debug)]
 pub struct Universe {
     width: u32,
@@ -43,8 +28,8 @@ impl Universe {
     fn live_neighbour_count(&self, row: u32, col: u32) -> u8 {
         let mut sum = 0;
 
-        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
-            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
+        for delta_row in [self.height - 1, 0, 1].iter().copied() {
+            for delta_col in [self.width - 1, 0, 1].iter().copied() {
                 if delta_row == 0 && delta_col == 0 {
                     continue;
                 }
@@ -59,17 +44,17 @@ impl Universe {
     }
 
     /// Convert properly formatted Vec of Strings to Universe
-    fn from_vec_str(s: Vec<String>) -> Self {
+    fn from_vec_str(s: &[String]) -> Self {
         let mut cells = Vec::new();
 
-        for line in &s {
+        for line in s {
             for ch in line.chars() {
                 if ch == '#' || ch == '1' {
                     cells.push(Cell::Alive);
                 } else if ch == '_' || ch == ' ' || ch == '0' {
                     cells.push(Cell::Dead);
                 } else {
-                    eprintln!("Can't do nothing with this character: {}", ch);
+                    eprintln!("Can't do nothing with this character: {ch}");
                 }
             }
         }
@@ -89,14 +74,18 @@ impl Universe {
     /// Set cells to be alive in a universe by passing the row and column
     /// of each cell as an array.
     pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
-        for (row, col) in cells.iter().cloned() {
+        for (row, col) in cells.iter().copied() {
             let idx = self.get_index(row, col);
             self.cells[idx] = Cell::Alive;
         }
     }
 
     /// Create universe with width, height: inserting starting shape into the middle
-    pub fn from_figur(wh: u32, figur: Vec<String>) -> Result<Universe, ShapeError> {
+    ///
+    /// # Errors
+    ///
+    /// if shape can't fit universe
+    pub fn from_figur(wh: u32, figur: &[String]) -> Result<Universe, ShapeError> {
         let figur = Universe::from_vec_str(figur);
         println!("{}\r", &figur);
 
@@ -128,7 +117,6 @@ impl Universe {
 }
 
 /// Public functions exported to JavaScript as well.
-#[wasm_bindgen]
 impl Universe {
     /// update life: Universe
     pub fn tick(&mut self) {
@@ -146,7 +134,7 @@ impl Universe {
                     (Cell::Alive, n) if n < 2 => Cell::Dead,
                     // Rule 2: Any live cell with two or three live neighbours
                     // lives on to the next generation.
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+                    (Cell::Alive, 2 | 3) => Cell::Alive,
                     // Rule 3: Any live cell with more than three live
                     // neighbours dies, as if by overpopulation.
                     (Cell::Alive, n) if n > 3 => Cell::Dead,
@@ -214,7 +202,7 @@ impl fmt::Display for Universe {
             write!(f, "│")?;
             for &cell in line {
                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
-                write!(f, "{} ", symbol)?;
+                write!(f, "{symbol} ")?;
             }
             writeln!(f, "│\r")?;
         }
@@ -226,7 +214,6 @@ impl fmt::Display for Universe {
 pub mod shapes {
     use super::*;
 
-    #[wasm_bindgen]
     pub fn two_engine_cordership() -> String {
         todo!();
         // [
@@ -242,7 +229,6 @@ pub mod shapes {
         // .concat()
     }
 
-    #[wasm_bindgen]
     pub fn copperhead() -> Vec<String> {
         // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
         [
@@ -258,7 +244,6 @@ pub mod shapes {
         .to_vec()
     }
 
-    #[wasm_bindgen]
     pub fn gosper_glider_gun() -> Vec<String> {
         [
             ["_".repeat(24), "#".into(), "_".repeat(11)].concat(),
@@ -305,22 +290,18 @@ pub mod shapes {
         .to_vec()
     }
 
-    #[wasm_bindgen]
     pub fn sir_robin() -> String {
         todo!()
     }
 
-    #[wasm_bindgen]
     pub fn snark_loop() -> String {
         todo!()
     }
 
-    #[wasm_bindgen]
     pub fn featherweigth_spaceship() -> Vec<String> {
         ["__#".into(), "#_#".into(), "_##".into()].to_vec()
     }
 
-    #[wasm_bindgen]
     pub fn rand(width: u32, height: u32) -> Universe {
         let cells = (0..width * height)
             .map(|_i| {
@@ -342,7 +323,6 @@ pub mod shapes {
         }
     }
 
-    #[wasm_bindgen]
     pub fn stripes(width: u32, height: u32) -> Universe {
         let cells = (0..width * height)
             .map(|i| {
@@ -379,17 +359,22 @@ impl std::fmt::Display for ShapeError {
 }
 
 /// Returns universe created from `i`. shape if exists
+///
+/// # Errors
+///
+/// `from_figur()`
+/// `IndexOutOfRange`
 pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
     if i > SHAPES_N as usize {
         return Err(ShapeError::OutOfRange);
     }
 
     match i {
-        0 => Universe::from_figur(wh, shapes::featherweigth_spaceship()),
+        0 => Universe::from_figur(wh, &shapes::featherweigth_spaceship()),
 
-        1 => Universe::from_figur(wh, shapes::copperhead()),
+        1 => Universe::from_figur(wh, &shapes::copperhead()),
 
-        2 => Universe::from_figur(wh, shapes::gosper_glider_gun()),
+        2 => Universe::from_figur(wh, &shapes::gosper_glider_gun()),
 
         3 => Ok(shapes::stripes(wh, wh)),
 
@@ -405,32 +390,31 @@ pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
 pub mod kmaps {
     use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 
+    /// Create Event from ch
+    fn ch_to_event(ch: char) -> Event {
+        Event::Key(KeyCode::Char(ch).into())
+    }
+
     pub fn play_pause() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char(' ').into())]
+        vec![ch_to_event(' ')]
     }
 
     pub fn slower() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Char('j').into()),
-            Event::Key(KeyCode::Down.into()),
-        ]
+        vec![ch_to_event('j'), Event::Key(KeyCode::Down.into())]
     }
     pub fn slower_big() -> Vec<Event> {
         vec![
-            Event::Key(KeyCode::Char('J').into()),
+            ch_to_event('J'),
             Event::Key(KeyEvent::new(KeyCode::Down, KeyModifiers::SHIFT)),
         ]
     }
 
     pub fn faster() -> Vec<Event> {
-        vec![
-            Event::Key(KeyCode::Char('k').into()),
-            Event::Key(KeyCode::Up.into()),
-        ]
+        vec![ch_to_event('k'), Event::Key(KeyCode::Up.into())]
     }
     pub fn faster_big() -> Vec<Event> {
         vec![
-            Event::Key(KeyCode::Char('K').into()),
+            ch_to_event('K'),
             Event::Key(KeyEvent::new(KeyCode::Up, KeyModifiers::SHIFT)),
         ]
     }
@@ -438,7 +422,7 @@ pub mod kmaps {
     pub fn quit() -> Vec<Event> {
         vec![
             Event::Key(KeyCode::Esc.into()),
-            Event::Key(KeyCode::Char('q').into()),
+            ch_to_event('q'),
             Event::Key(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)),
         ]
     }
@@ -457,6 +441,20 @@ pub mod kmaps {
     pub fn smaller() -> Vec<Event> {
         vec![Event::Key(KeyCode::Char('-').into())]
     }
+
+    // mouse-bullshit, no-need
+    // pub fn toggle() -> Vec<Event> {
+    // vec![Event::Mouse(MouseEvent {
+    //     kind: MouseEventKind::Down(MouseButton::Left),
+    //     column,
+    //     row,
+    //     modifiers,
+    // })]
+    // vec![Event::Mouse(MouseEventKind::Down(MouseButton::Left).into())]
+    // vec![Event::Mouse(MouseEvent{MouseEventKind::Down(
+    //     MouseButton::Left,
+    // ), ..})]
+    // }
 
     // to use mouse to toggle cells, these can be useful:
     // - terminal::size()
