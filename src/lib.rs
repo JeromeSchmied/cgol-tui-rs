@@ -188,9 +188,8 @@ impl Universe {
     }
 }
 
-use std::{fmt, time::Duration};
-
 use crate::shapes::HandleError;
+use std::{fmt, time::Duration};
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -208,42 +207,108 @@ impl fmt::Display for Universe {
     }
 }
 
-pub fn faster(poll_t: &mut Duration, big: bool) {
-    let div = if big { 2 } else { 5 };
-    *poll_t = poll_t
-        .checked_sub(poll_t.checked_div(div).unwrap_or(DEF_DUR))
-        .unwrap_or(DEF_DUR);
+pub struct App {
+    universe: Universe,
+    pub wh: u32,
+    i: usize,
+    poll_t: Duration,
+    paused: bool,
 }
-
-pub fn slower(poll_t: &mut Duration, big: bool) {
-    let div = if big { 2 } else { 5 };
-    *poll_t = poll_t
-        .checked_add(poll_t.checked_div(div).unwrap_or(DEF_DUR))
-        .unwrap_or(DEF_DUR);
-}
-
-pub fn next(i: &mut usize, wh: u32, universe: &mut Universe) {
-    if *i + 1 != shapes::N as usize {
-        *i += 1;
-    } else {
-        *i = 0;
-    }
-    if let Ok(shape) = shapes::get(wh, *i) {
-        *universe = shape;
-    } else {
-        eprintln!("Couldn't switch to next shape\r");
+impl Default for App {
+    fn default() -> Self {
+        let wh = 36;
+        let i = 0;
+        App {
+            universe: shapes::get(wh, i).unwrap(),
+            wh,
+            i,
+            poll_t: DEF_DUR,
+            paused: false,
+        }
     }
 }
-
-pub fn prev(i: &mut usize, wh: u32, universe: &mut Universe) {
-    if *i > 0 {
-        *i -= 1;
-    } else {
-        *i = shapes::N as usize - 1;
+impl App {
+    pub fn paused(&self) -> bool {
+        self.paused
     }
-    if let Ok(shape) = shapes::get(wh, *i) {
-        *universe = shape;
-    } else {
-        eprintln!("Couldn't switch to previous shape\r");
+    pub fn poll_t(&self) -> Duration {
+        self.poll_t
+    }
+    pub fn render_universe(&self) -> String {
+        self.universe.to_string()
+    }
+
+    pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
+        if self.paused() {
+            println!("Resuming: poll() = {:?}\r", prev_poll_t);
+            self.poll_t = *prev_poll_t;
+        } else {
+            println!("Pausing...\r");
+            *prev_poll_t = self.poll_t;
+            self.poll_t = Duration::MAX;
+        }
+        self.paused = !self.paused;
+    }
+    pub fn restart(&mut self) {
+        self.universe = shapes::get(self.wh, self.i).unwrap();
+    }
+
+    pub fn smaller(&mut self) {
+        if let Ok(shape) = shapes::get(self.wh - 1, self.i) {
+            self.universe = shape;
+            self.wh -= 1;
+        } else {
+            eprintln!("Couldn't make smaller");
+        }
+    }
+    pub fn bigger(&mut self) {
+        if let Ok(shape) = shapes::get(self.wh + 1, self.i) {
+            self.universe = shape;
+        }
+        self.wh += 1;
+    }
+
+    pub fn tick(&mut self) {
+        self.universe.tick();
+    }
+
+    pub fn faster(&mut self, big: bool) {
+        let div = if big { 2 } else { 5 };
+        self.poll_t = self
+            .poll_t
+            .checked_sub(self.poll_t.checked_div(div).unwrap_or(DEF_DUR))
+            .unwrap_or(DEF_DUR);
+    }
+    pub fn slower(&mut self, big: bool) {
+        let div = if big { 2 } else { 5 };
+        self.poll_t = self
+            .poll_t
+            .checked_add(self.poll_t.checked_div(div).unwrap_or(DEF_DUR))
+            .unwrap_or(DEF_DUR);
+    }
+
+    pub fn next(&mut self) {
+        if self.i + 1 != shapes::N as usize {
+            self.i += 1;
+        } else {
+            self.i = 0;
+        }
+        if let Ok(shape) = shapes::get(self.wh, self.i) {
+            self.universe = shape;
+        } else {
+            eprintln!("Couldn't switch to next shape\r");
+        }
+    }
+    pub fn prev(&mut self) {
+        if self.i > 0 {
+            self.i -= 1;
+        } else {
+            self.i = shapes::N as usize - 1;
+        }
+        if let Ok(shape) = shapes::get(self.wh, self.i) {
+            self.universe = shape;
+        } else {
+            eprintln!("Couldn't switch to previous shape\r");
+        }
     }
 }

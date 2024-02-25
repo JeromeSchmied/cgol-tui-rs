@@ -16,7 +16,6 @@ fn main() -> io::Result<()> {
 }
 
 use crossterm::{
-    cursor::MoveTo,
     event::{poll, read},
     execute,
     terminal::{
@@ -24,27 +23,26 @@ use crossterm::{
         LeaveAlternateScreen,
     },
 };
-use std::{
-    io::{self},
-    time::Duration,
-};
+use std::io;
 
 fn print_events() -> io::Result<()> {
     execute!(io::stdout(), EnterAlternateScreen)?;
 
+    let mut app = App::default();
+
     // widht and height, as they're the same
-    let mut wh = DEF_WH;
+    // let mut wh = DEF_WH;
 
-    let mut i: usize = 0;
-    let mut universe = shapes::get(wh, i).unwrap();
+    // let mut i: usize = 0;
+    // let mut universe = shapes::get(wh, i).unwrap();
 
-    let mut poll_t = DEF_DUR;
-    let mut paused = false;
-    let mut prev_poll_t = poll_t;
+    // let mut poll_t = DEF_DUR;
+    // let mut paused = false;
+    let mut prev_poll_t = app.poll_t();
 
     loop {
         // Wait up to `poll_t` for another event
-        if poll(poll_t)? {
+        if poll(app.poll_t())? {
             // It's guaranteed that read() won't block if `poll` returns `Ok(true)`
             let event = read()?;
 
@@ -52,69 +50,48 @@ fn print_events() -> io::Result<()> {
                 println!("Quitting...\r");
                 break;
             } else if kmaps::slower().contains(&event) {
-                if !paused {
-                    slower(&mut poll_t, false);
+                if !app.paused() {
+                    app.slower(false);
                 }
-                println!("poll time is now: {:?}\r", poll_t);
+                println!("poll time is now: {:?}\r", app.poll_t());
             } else if kmaps::faster().contains(&event) {
-                if !paused {
-                    faster(&mut poll_t, false);
+                if !app.paused() {
+                    app.faster(false);
                 }
 
-                println!("poll time is now: {:?}\r", poll_t);
+                println!("poll time is now: {:?}\r", app.poll_t());
             } else if kmaps::slower_big().contains(&event) {
-                if !paused {
-                    slower(&mut poll_t, true);
+                if !app.paused() {
+                    app.slower(true);
                 }
-                println!("poll time is now: {:?}\r", poll_t);
+                println!("poll time is now: {:?}\r", app.poll_t());
             } else if kmaps::faster_big().contains(&event) {
-                if !paused {
-                    faster(&mut poll_t, true);
+                if !app.paused() {
+                    app.faster(true);
                 }
-                println!("poll time is now: {:?}\r", poll_t);
+                println!("poll time is now: {:?}\r", app.poll_t());
             } else if kmaps::play_pause().contains(&event) {
-                if paused {
-                    println!("Resuming: poll() = {:?}\r", prev_poll_t);
-                    poll_t = prev_poll_t;
-                } else {
-                    println!("Pausing...\r");
-                    prev_poll_t = poll_t;
-                    poll_t = Duration::MAX;
-                }
-                paused = !paused;
+                app.play_pause(&mut prev_poll_t);
             } else if kmaps::restart().contains(&event) {
-                universe = shapes::get(wh, i).unwrap();
+                app.restart();
             } else if kmaps::next().contains(&event) {
-                next(&mut i, wh, &mut universe);
+                app.next();
             } else if kmaps::prev().contains(&event) {
-                prev(&mut i, wh, &mut universe);
+                app.prev();
             } else if kmaps::smaller().contains(&event) {
-                if let Ok(shape) = shapes::get(wh - 1, i) {
-                    universe = shape;
-                    wh -= 1;
-                } else {
-                    eprintln!("Couldn't make smaller");
-                }
+                app.smaller();
             } else if kmaps::bigger().contains(&event) {
-                if let Ok(shape) = shapes::get(wh + 1, i) {
-                    universe = shape;
-                }
-                wh += 1;
+                app.bigger();
             } else if kmaps::reset().contains(&event) {
-                i = 0;
-                paused = false;
-                wh = DEF_WH;
-                poll_t = DEF_DUR;
-                prev_poll_t = poll_t;
-                universe = shapes::get(wh, i).unwrap();
+                app = App::default();
             } else {
                 eprintln!("Unknown event: {event:?}\r");
             }
         } else {
             // Timeout expired, updating life state
-            execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::FromCursorDown))?;
-            println!("{}", universe);
-            universe.tick();
+            execute!(io::stdout(), Clear(ClearType::All))?;
+            println!("{}", app.render_universe());
+            app.tick();
         }
     }
 

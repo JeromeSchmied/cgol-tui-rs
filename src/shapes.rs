@@ -183,10 +183,6 @@ pub fn two_engine_cordership() -> String {
     // .concat()
 }
 
-pub fn sir_robin() -> String {
-    todo!()
-}
-
 pub fn snark_loop() -> String {
     todo!()
 }
