@@ -1,5 +1,6 @@
 use conways_game_of_life_cli_rs::*;
 
+const DEFAULT_DUR: Duration = Duration::from_millis(400);
 const HELP: &str = r#"Blocking poll() & non-blocking read()
  - Prints current state of Conway's Game of Life if there's no event
  - Use Esc or `q` to quit
@@ -50,20 +51,18 @@ fn print_events() -> io::Result<()> {
     let mut i: usize = 0;
     let mut universe = get_shape(wh, i).unwrap();
 
-    const DEFAULT_DUR: Duration = Duration::from_millis(400);
     let mut poll_t = DEFAULT_DUR;
     let mut paused = false;
     let mut prev_poll_t = DEFAULT_DUR;
 
     loop {
-        // Wait up to 1s for another event
+        // Wait up to `poll_t` for another event
         if poll(poll_t)? {
             // It's guaranteed that read() won't block if `poll` returns `Ok(true)`
             let event = read()?;
 
             if kmaps::quit().contains(&event) {
                 println!("Quitting...\r");
-                // queue!(io::stdout(), Print("Quitting..."))?;
                 break;
             } else if kmaps::slower().contains(&event) {
                 if poll_t < Duration::from_millis(40) {
@@ -135,36 +134,7 @@ fn print_events() -> io::Result<()> {
                 } else {
                     eprintln!("Couldn't make larger");
                 }
-            // } else if event == MouseEventKind::Down(MouseButton::Left.into()) {
-            // } else if event == Event::Mouse(MouseEvent { kind, column , row , modifiers  }) {
-            // } else {
-            // println!("Unknown: Event::{:?}\r", event);
             } else {
-                // match event {
-                //     crossterm::event::Event::FocusGained => eprintln!("Focus Gained."),
-                //     crossterm::event::Event::FocusLost => eprintln!("Focus Lost."),
-                //     crossterm::event::Event::Key(k) => {
-                //         eprintln!("Unknown key: {:?}", k);
-                //     }
-                //     crossterm::event::Event::Mouse(m) => {
-                //         if m.kind == MouseEventKind::Up(MouseButton::Left)
-                //             || m.kind == MouseEventKind::Drag(MouseButton::Left)
-                //         {
-                //             // eprintln!("row: {}, col: {}\r", m.row - 1, m.column - 1);
-                //             std::thread::sleep(DEFAULT_DUR);
-                //             if m.row > 0
-                //                 && m.row <= universe.height() as u16
-                //                 && m.column > 0
-                //                 && m.column < universe.width() as u16
-                //             {
-                //                 universe.toggle_cell((m.row - 1).into(), (m.column - 1).into());
-                //             }
-                //             println!("{}", universe);
-                //         }
-                //     }
-                //     crossterm::event::Event::Paste(_) => eprintln!("Paste"),
-                //     crossterm::event::Event::Resize(_, _) => eprintln!("Resize"),
-                // }
                 eprintln!("Unknown event: {:?}", event);
             }
         } else {
@@ -173,13 +143,9 @@ fn print_events() -> io::Result<()> {
             execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::FromCursorDown))?;
             println!("{}", universe);
         }
-        // io::stdout().flush()?;
     }
 
-    execute!(
-        io::stdout(),
-        LeaveAlternateScreen /*, DisableMouseCapture*/
-    )?;
+    execute!(io::stdout(), LeaveAlternateScreen)?;
 
     Ok(())
 }
