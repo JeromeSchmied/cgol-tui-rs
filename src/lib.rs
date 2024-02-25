@@ -275,6 +275,16 @@ pub mod shapes {
         ["__#".into(), "#_#".into(), "_##".into()].to_vec()
     }
 
+    pub fn rabbits() -> Vec<String> {
+        [
+            "#_____#_".into(),
+            "__#___#_".into(),
+            "__#__#_#".into(),
+            "_#_#____".into(),
+        ]
+        .to_vec()
+    }
+
     pub fn rand(width: u32, height: u32) -> Universe {
         let cells = (0..width * height)
             .map(|_i| {
