@@ -441,21 +441,16 @@ pub mod kmaps {
     // - Cursor::position()
 }
 
-pub fn faster(poll_t: &mut Duration, _big: bool) {
-    // if _big {
-    // *poll_t -= *poll_t * 10;
-    // *poll_t = poll_t.checked_sub(*poll_t * 2).unwrap_or(*poll_t);
-    // }
+pub fn faster(poll_t: &mut Duration, big: bool) {
+    let div = if big { 2 } else { 5 };
     *poll_t = poll_t
-        .checked_sub(poll_t.checked_div(10).unwrap_or(DEF_DUR))
+        .checked_sub(poll_t.checked_div(div).unwrap_or(DEF_DUR))
         .unwrap_or(DEF_DUR);
 }
 
-pub fn slower(poll_t: &mut Duration, _big: bool) {
-    // if _big {
-    //     *poll_t = poll_t.checked_add(*poll_t * 2).unwrap_or(*poll_t);
-    // }
+pub fn slower(poll_t: &mut Duration, big: bool) {
+    let div = if big { 2 } else { 5 };
     *poll_t = poll_t
-        .checked_add(poll_t.checked_div(10).unwrap_or(DEF_DUR))
+        .checked_add(poll_t.checked_div(div).unwrap_or(DEF_DUR))
         .unwrap_or(DEF_DUR);
 }

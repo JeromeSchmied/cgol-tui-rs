@@ -130,10 +130,8 @@ fn print_events() -> io::Result<()> {
             } else if kmaps::bigger().contains(&event) {
                 if let Ok(shape) = get_shape(wh + 1, i) {
                     universe = shape;
-                    wh += 1;
-                } else {
-                    eprintln!("Couldn't make larger");
                 }
+                wh += 1;
             } else if kmaps::reset().contains(&event) {
                 i = 0;
                 paused = false;
@@ -142,7 +140,7 @@ fn print_events() -> io::Result<()> {
                 prev_poll_t = poll_t;
                 universe = get_shape(wh, i).unwrap();
             } else {
-                eprintln!("Unknown event: {:?}", event);
+                eprintln!("Unknown event: {event:?}\r");
             }
         } else {
             // Timeout expired, updating life state
