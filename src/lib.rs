@@ -325,7 +325,7 @@ pub mod shapes {
 }
 
 /// Number of currently supported shapes
-pub const SHAPES_N: u8 = 5;
+pub const SHAPES_N: u8 = 6;
 
 #[derive(Debug)]
 pub enum ShapeError {
@@ -362,6 +362,8 @@ pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
         3 => Ok(shapes::stripes(wh, wh)),
 
         4 => Ok(shapes::rand(wh, wh)),
+
+        5 => Universe::from_figur(wh, &shapes::rabbits()),
 
         _ => Err(ShapeError::OutOfRange),
     }
