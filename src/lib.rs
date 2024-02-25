@@ -88,10 +88,6 @@ impl Universe {
 
     /// Create universe with width, height: inserting starting shape into the middle
     ///
-    /// # Buggy!
-    ///
-    /// doesn't work properly for blonk-tie, banana-spark, bunnies
-    ///
     /// # Errors
     ///
     /// if shape can't fit universe
@@ -307,27 +303,6 @@ pub mod kmaps {
     pub fn smaller() -> Vec<Event> {
         vec![ch_to_event('-')]
     }
-
-    // mouse-bullshit, no-need
-    // pub fn toggle() -> Vec<Event> {
-    // vec![Event::Mouse(MouseEvent {
-    //     kind: MouseEventKind::Down(MouseButton::Left),
-    //     column,
-    //     row,
-    //     modifiers,
-    // })]
-    // vec![Event::Mouse(MouseEventKind::Down(MouseButton::Left).into())]
-    // vec![Event::Mouse(MouseEvent{MouseEventKind::Down(
-    //     MouseButton::Left,
-    // ), ..})]
-    // }
-
-    // to use mouse to toggle cells, these can be useful:
-    // - terminal::size()
-    // - Mouse(Event)::Push(Left)
-    // - Drag(Left)
-    // - execute!(io::stdout(), (Enable/Disable)MouseCapture)
-    // - Cursor::position()
 }
 
 pub fn faster(poll_t: &mut Duration, big: bool) {
