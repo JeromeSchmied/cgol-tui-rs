@@ -52,47 +52,22 @@ fn print_events() -> io::Result<()> {
                 println!("Quitting...\r");
                 break;
             } else if kmaps::slower().contains(&event) {
-                // if poll_t < Duration::from_millis(40) {
-                //     poll_t = poll_t
-                //         .checked_add(Duration::from_millis(1))
-                //         .unwrap_or(DEFAULT_DUR);
-                // } else {
-                //     poll_t = poll_t
-                //         .checked_add(Duration::from_millis(10))
-                //         .unwrap_or(DEFAULT_DUR);
-                // }
                 if !paused {
                     slower(&mut poll_t, false);
                 }
-                // queue!(io::stdout(), Print("Poll time is now"))?;
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::faster().contains(&event) {
-                // if poll_t < Duration::from_millis(40) {
-                //     poll_t = poll_t
-                //         .checked_sub(Duration::from_millis(1))
-                //         .unwrap_or(DEFAULT_DUR);
-                // } else {
-                //     poll_t = poll_t
-                //         .checked_sub(Duration::from_millis(10))
-                //         .unwrap_or(DEFAULT_DUR);
-                // }
                 if !paused {
                     faster(&mut poll_t, false);
                 }
 
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::slower_big().contains(&event) {
-                // poll_t = poll_t
-                //     .checked_add(Duration::from_millis(100))
-                //     .unwrap_or(Duration::from_millis(400));
                 if !paused {
                     slower(&mut poll_t, true);
                 }
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::faster_big().contains(&event) {
-                // poll_t = poll_t
-                //     .checked_sub(Duration::from_millis(100))
-                //     .unwrap_or(Duration::from_millis(400));
                 if !paused {
                     faster(&mut poll_t, true);
                 }
@@ -144,9 +119,9 @@ fn print_events() -> io::Result<()> {
             }
         } else {
             // Timeout expired, updating life state
-            universe.tick();
             execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::FromCursorDown))?;
             println!("{}", universe);
+            universe.tick();
         }
     }
 

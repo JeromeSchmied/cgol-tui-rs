@@ -9,6 +9,8 @@ pub const HELP: &str = r#"Blocking poll() & non-blocking read()
  - `j`, `k`: decreasing, increasing speed
  - press Space to pause, play
  - hit `n` to switch to next shape
+ - if you want to restart, push `r`
+ - to reset everything to starting phase, hit `R`
  - and now, press Enter to continue
 "#;
 
@@ -238,7 +240,7 @@ pub fn get_shape(wh: u32, i: usize) -> Result<Universe, ShapeError> {
 
         6 => Universe::from_figur(wh, &shapes::bonk_tie()),
 
-        7 => Universe::from_figur(wh, &shapes::banana_spark()),
+        7 => Universe::from_figur(wh, &shapes::acorn()),
 
         _ => Err(ShapeError::OutOfRange),
     }

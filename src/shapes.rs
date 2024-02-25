@@ -90,9 +90,9 @@ pub fn bonk_tie() -> Vec<String> {
     .to_vec()
 }
 
-/// 2×3
-pub fn banana_spark() -> Vec<String> {
-    ["#_".into(), "_#".into(), "_#".into()].to_vec()
+/// 7×3
+pub fn acorn() -> Vec<String> {
+    ["_#_____".into(), "___#___".into(), "##__###".into()].to_vec()
 }
 
 pub fn rand(width: u32, height: u32) -> Universe {
