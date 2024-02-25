@@ -1,15 +1,5 @@
 use conways_game_of_life_cli_rs::*;
 
-const DEFAULT_DUR: Duration = Duration::from_millis(400);
-const HELP: &str = r#"Blocking poll() & non-blocking read()
- - Prints current state of Conway's Game of Life if there's no event
- - Use Esc or `q` to quit
- - `j`, `k`: decreasing, increasing speed
- - press Space to pause, play
- - hit `n` to switch to next shape
- - and now, press Enter to continue
-"#;
-
 fn main() -> io::Result<()> {
     println!("{}", HELP);
     std::io::stdin().read_line(&mut String::new()).unwrap();
@@ -40,20 +30,17 @@ use std::{
 };
 
 fn print_events() -> io::Result<()> {
-    execute!(
-        io::stdout(),
-        EnterAlternateScreen /*, EnableMouseCapture*/
-    )?;
+    execute!(io::stdout(), EnterAlternateScreen)?;
 
     // widht and height, as they're the same
-    let mut wh = 38;
+    let mut wh = DEF_WH;
 
     let mut i: usize = 0;
     let mut universe = get_shape(wh, i).unwrap();
 
-    let mut poll_t = DEFAULT_DUR;
+    let mut poll_t = DEF_DUR;
     let mut paused = false;
-    let mut prev_poll_t = DEFAULT_DUR;
+    let mut prev_poll_t = poll_t;
 
     loop {
         // Wait up to `poll_t` for another event
@@ -65,37 +52,50 @@ fn print_events() -> io::Result<()> {
                 println!("Quitting...\r");
                 break;
             } else if kmaps::slower().contains(&event) {
-                if poll_t < Duration::from_millis(40) {
-                    poll_t = poll_t
-                        .checked_add(Duration::from_millis(1))
-                        .unwrap_or(DEFAULT_DUR);
-                } else {
-                    poll_t = poll_t
-                        .checked_add(Duration::from_millis(10))
-                        .unwrap_or(DEFAULT_DUR);
+                // if poll_t < Duration::from_millis(40) {
+                //     poll_t = poll_t
+                //         .checked_add(Duration::from_millis(1))
+                //         .unwrap_or(DEFAULT_DUR);
+                // } else {
+                //     poll_t = poll_t
+                //         .checked_add(Duration::from_millis(10))
+                //         .unwrap_or(DEFAULT_DUR);
+                // }
+                if !paused {
+                    slower(&mut poll_t, false);
                 }
                 // queue!(io::stdout(), Print("Poll time is now"))?;
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::faster().contains(&event) {
-                if poll_t < Duration::from_millis(40) {
-                    poll_t = poll_t
-                        .checked_sub(Duration::from_millis(1))
-                        .unwrap_or(DEFAULT_DUR);
-                } else {
-                    poll_t = poll_t
-                        .checked_sub(Duration::from_millis(10))
-                        .unwrap_or(DEFAULT_DUR);
+                // if poll_t < Duration::from_millis(40) {
+                //     poll_t = poll_t
+                //         .checked_sub(Duration::from_millis(1))
+                //         .unwrap_or(DEFAULT_DUR);
+                // } else {
+                //     poll_t = poll_t
+                //         .checked_sub(Duration::from_millis(10))
+                //         .unwrap_or(DEFAULT_DUR);
+                // }
+                if !paused {
+                    faster(&mut poll_t, false);
                 }
+
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::slower_big().contains(&event) {
-                poll_t = poll_t
-                    .checked_add(Duration::from_millis(100))
-                    .unwrap_or(Duration::from_millis(400));
+                // poll_t = poll_t
+                //     .checked_add(Duration::from_millis(100))
+                //     .unwrap_or(Duration::from_millis(400));
+                if !paused {
+                    slower(&mut poll_t, true);
+                }
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::faster_big().contains(&event) {
-                poll_t = poll_t
-                    .checked_sub(Duration::from_millis(100))
-                    .unwrap_or(Duration::from_millis(400));
+                // poll_t = poll_t
+                //     .checked_sub(Duration::from_millis(100))
+                //     .unwrap_or(Duration::from_millis(400));
+                if !paused {
+                    faster(&mut poll_t, true);
+                }
                 println!("poll time is now: {:?}\r", poll_t);
             } else if kmaps::play_pause().contains(&event) {
                 if paused {
@@ -107,7 +107,7 @@ fn print_events() -> io::Result<()> {
                     poll_t = Duration::MAX;
                 }
                 paused = !paused;
-            } else if kmaps::reset().contains(&event) {
+            } else if kmaps::restart().contains(&event) {
                 universe = get_shape(wh, i).unwrap();
             } else if kmaps::next().contains(&event) {
                 if i + 1 != SHAPES_N as usize {
@@ -134,6 +134,13 @@ fn print_events() -> io::Result<()> {
                 } else {
                     eprintln!("Couldn't make larger");
                 }
+            } else if kmaps::reset().contains(&event) {
+                i = 0;
+                paused = false;
+                wh = DEF_WH;
+                poll_t = DEF_DUR;
+                prev_poll_t = poll_t;
+                universe = get_shape(wh, i).unwrap();
             } else {
                 eprintln!("Unknown event: {:?}", event);
             }

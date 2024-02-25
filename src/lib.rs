@@ -1,3 +1,17 @@
+/// Default poll duration
+pub const DEF_DUR: Duration = Duration::from_millis(400);
+/// Default Width and Height
+pub const DEF_WH: u32 = 32;
+/// Help message
+pub const HELP: &str = r#"Blocking poll() & non-blocking read()
+ - Prints current state of Conway's Game of Life if there's no event
+ - Use Esc or `q` to quit
+ - `j`, `k`: decreasing, increasing speed
+ - press Space to pause, play
+ - hit `n` to switch to next shape
+ - and now, press Enter to continue
+"#;
+
 /// information about one `Cell`: either `Dead` or `Alive`
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
@@ -152,7 +166,7 @@ impl Universe {
     }
 }
 
-use std::fmt;
+use std::{fmt, time::Duration};
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -386,19 +400,23 @@ pub mod kmaps {
         ]
     }
 
+    pub fn restart() -> Vec<Event> {
+        vec![ch_to_event('r')]
+    }
+
     pub fn reset() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('R').into())]
+        vec![ch_to_event('R')]
     }
 
     pub fn next() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('n').into())]
+        vec![ch_to_event('n')]
     }
 
     pub fn bigger() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('+').into())]
+        vec![ch_to_event('+')]
     }
     pub fn smaller() -> Vec<Event> {
-        vec![Event::Key(KeyCode::Char('-').into())]
+        vec![ch_to_event('-')]
     }
 
     // mouse-bullshit, no-need
@@ -421,4 +439,23 @@ pub mod kmaps {
     // - Drag(Left)
     // - execute!(io::stdout(), (Enable/Disable)MouseCapture)
     // - Cursor::position()
+}
+
+pub fn faster(poll_t: &mut Duration, _big: bool) {
+    // if _big {
+    // *poll_t -= *poll_t * 10;
+    // *poll_t = poll_t.checked_sub(*poll_t * 2).unwrap_or(*poll_t);
+    // }
+    *poll_t = poll_t
+        .checked_sub(poll_t.checked_div(10).unwrap_or(DEF_DUR))
+        .unwrap_or(DEF_DUR);
+}
+
+pub fn slower(poll_t: &mut Duration, _big: bool) {
+    // if _big {
+    //     *poll_t = poll_t.checked_add(*poll_t * 2).unwrap_or(*poll_t);
+    // }
+    *poll_t = poll_t
+        .checked_add(poll_t.checked_div(10).unwrap_or(DEF_DUR))
+        .unwrap_or(DEF_DUR);
 }
