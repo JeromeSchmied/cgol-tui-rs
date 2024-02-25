@@ -296,6 +296,9 @@ pub mod kmaps {
     pub fn next() -> Vec<Event> {
         vec![ch_to_event('n')]
     }
+    pub fn prev() -> Vec<Event> {
+        vec![ch_to_event('p')]
+    }
 
     pub fn bigger() -> Vec<Event> {
         vec![ch_to_event('+')]
@@ -317,4 +320,30 @@ pub fn slower(poll_t: &mut Duration, big: bool) {
     *poll_t = poll_t
         .checked_add(poll_t.checked_div(div).unwrap_or(DEF_DUR))
         .unwrap_or(DEF_DUR);
+}
+
+pub fn next(i: &mut usize, wh: u32, universe: &mut Universe) {
+    if *i + 1 != shapes::N as usize {
+        *i += 1;
+    } else {
+        *i = 0;
+    }
+    if let Ok(shape) = get_shape(wh, *i) {
+        *universe = shape;
+    } else {
+        eprintln!("Couldn't switch to next shape\r");
+    }
+}
+
+pub fn prev(i: &mut usize, wh: u32, universe: &mut Universe) {
+    if *i > 0 {
+        *i -= 1;
+    } else {
+        *i = shapes::N as usize - 1;
+    }
+    if let Ok(shape) = get_shape(wh, *i) {
+        *universe = shape;
+    } else {
+        eprintln!("Couldn't switch to previous shape\r");
+    }
 }
