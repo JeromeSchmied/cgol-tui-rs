@@ -14,6 +14,8 @@ pub const HELP: &str = r#"Blocking poll() & non-blocking read()
  - and now, press Enter to continue
 "#;
 
+/// App
+pub mod app;
 /// Keymaps to handle input events
 pub mod kmaps;
 /// Starting shapes
@@ -188,7 +190,7 @@ impl Universe {
     }
 }
 
-use crate::shapes::HandleError;
+use crate::{app::App, shapes::HandleError};
 use std::{fmt, time::Duration};
 
 impl fmt::Display for Universe {
@@ -207,108 +209,77 @@ impl fmt::Display for Universe {
     }
 }
 
-pub struct App {
-    universe: Universe,
-    pub wh: u32,
-    i: usize,
-    poll_t: Duration,
-    paused: bool,
-}
-impl Default for App {
-    fn default() -> Self {
-        let wh = 36;
-        let i = 0;
-        App {
-            universe: shapes::get(wh, i).unwrap(),
-            wh,
-            i,
-            poll_t: DEF_DUR,
-            paused: false,
+use crossterm::{
+    cursor::MoveTo,
+    event::{poll, read},
+    execute,
+    terminal::{Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
+};
+use std::io;
+
+pub fn run() -> io::Result<()> {
+    execute!(io::stdout(), EnterAlternateScreen)?;
+
+    let mut app = App::default();
+
+    let mut prev_poll_t = app.poll_t();
+
+    loop {
+        // Wait up to `poll_t` for another event
+        if poll(app.poll_t())? {
+            // It's guaranteed that read() won't block if `poll` returns `Ok(true)`
+            let event = read()?;
+
+            if kmaps::quit().contains(&event) {
+                println!("Quitting...\r");
+                break;
+            } else if kmaps::slower().contains(&event) {
+                if !app.paused() {
+                    app.slower(false);
+                }
+                println!("poll time is now: {:?}\r", app.poll_t());
+            } else if kmaps::faster().contains(&event) {
+                if !app.paused() {
+                    app.faster(false);
+                }
+
+                println!("poll time is now: {:?}\r", app.poll_t());
+            } else if kmaps::slower_big().contains(&event) {
+                if !app.paused() {
+                    app.slower(true);
+                }
+                println!("poll time is now: {:?}\r", app.poll_t());
+            } else if kmaps::faster_big().contains(&event) {
+                if !app.paused() {
+                    app.faster(true);
+                }
+                println!("poll time is now: {:?}\r", app.poll_t());
+            } else if kmaps::play_pause().contains(&event) {
+                app.play_pause(&mut prev_poll_t);
+            } else if kmaps::restart().contains(&event) {
+                app.restart();
+            } else if kmaps::next().contains(&event) {
+                app.next();
+            } else if kmaps::prev().contains(&event) {
+                app.prev();
+            } else if kmaps::smaller().contains(&event) {
+                app.smaller();
+            } else if kmaps::bigger().contains(&event) {
+                app.bigger();
+            } else if kmaps::reset().contains(&event) {
+                app = app::App::default();
+            } else {
+                eprintln!("Unknown event: {event:?}\r");
+            }
+        } else {
+            // Timeout expired, updating life state
+            execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::All))?;
+            app.render_universe();
+            app.tick();
         }
-    }
-}
-impl App {
-    pub fn paused(&self) -> bool {
-        self.paused
-    }
-    pub fn poll_t(&self) -> Duration {
-        self.poll_t
-    }
-    pub fn render_universe(&self) {
-        println!("{}", self.universe);
     }
 
-    pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
-        if self.paused() {
-            println!("Resuming: poll() = {:?}\r", prev_poll_t);
-            self.poll_t = *prev_poll_t;
-        } else {
-            println!("Pausing...\r");
-            *prev_poll_t = self.poll_t;
-            self.poll_t = Duration::MAX;
-        }
-        self.paused = !self.paused;
-    }
-    pub fn restart(&mut self) {
-        self.universe = shapes::get(self.wh, self.i).unwrap();
-    }
+    execute!(io::stdout(), LeaveAlternateScreen)?;
 
-    pub fn smaller(&mut self) {
-        if let Ok(shape) = shapes::get(self.wh - 1, self.i) {
-            self.universe = shape;
-            self.wh -= 1;
-        } else {
-            eprintln!("Couldn't make smaller");
-        }
-    }
-    pub fn bigger(&mut self) {
-        if let Ok(shape) = shapes::get(self.wh + 1, self.i) {
-            self.universe = shape;
-        }
-        self.wh += 1;
-    }
-
-    pub fn tick(&mut self) {
-        self.universe.tick();
-    }
-
-    pub fn faster(&mut self, big: bool) {
-        let div = if big { 2 } else { 5 };
-        self.poll_t = self
-            .poll_t
-            .checked_sub(self.poll_t.checked_div(div).unwrap_or(DEF_DUR))
-            .unwrap_or(DEF_DUR);
-    }
-    pub fn slower(&mut self, big: bool) {
-        let div = if big { 2 } else { 5 };
-        self.poll_t = self
-            .poll_t
-            .checked_add(self.poll_t.checked_div(div).unwrap_or(DEF_DUR))
-            .unwrap_or(DEF_DUR);
-    }
-
-    pub fn next(&mut self) {
-        if self.i + 1 != shapes::N as usize {
-            self.i += 1;
-        } else {
-            self.i = 0;
-        }
-        if let Ok(shape) = shapes::get(self.wh, self.i) {
-            self.universe = shape;
-        } else {
-            eprintln!("Couldn't switch to next shape\r");
-        }
-    }
-    pub fn prev(&mut self) {
-        if self.i > 0 {
-            self.i -= 1;
-        } else {
-            self.i = shapes::N as usize - 1;
-        }
-        if let Ok(shape) = shapes::get(self.wh, self.i) {
-            self.universe = shape;
-        } else {
-            eprintln!("Couldn't switch to previous shape\r");
-        }
-    }
+    Ok(())
 }
