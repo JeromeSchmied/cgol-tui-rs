@@ -1,64 +1,24 @@
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::KeyCode;
 
-/// Create Event from ch
-fn ch_to_event(ch: char) -> Event {
-    Event::Key(KeyCode::Char(ch).into())
-}
+pub const PLAY_PAUSE: KeyCode = KeyCode::Char(' ');
 
-pub fn play_pause() -> Vec<Event> {
-    vec![ch_to_event(' ')]
-}
+pub const SLOWER: KeyCode = KeyCode::Char('j');
 
-pub fn slower() -> Vec<Event> {
-    vec![ch_to_event('j'), Event::Key(KeyCode::Down.into())]
-}
-pub fn slower_big() -> Vec<Event> {
-    vec![
-        ch_to_event('J'),
-        Event::Key(KeyEvent::new(KeyCode::Down, KeyModifiers::SHIFT)),
-    ]
-}
+pub const SLOWER_BIG: KeyCode = KeyCode::Char('J');
 
-pub fn faster() -> Vec<Event> {
-    vec![ch_to_event('k'), Event::Key(KeyCode::Up.into())]
-}
-pub fn faster_big() -> Vec<Event> {
-    vec![
-        ch_to_event('K'),
-        Event::Key(KeyEvent::new(KeyCode::Up, KeyModifiers::SHIFT)),
-    ]
-}
+pub const FASTER: KeyCode = KeyCode::Char('k');
+pub const FASTER_BIG: KeyCode = KeyCode::Char('K');
 
-pub fn quit() -> Vec<Event> {
-    vec![
-        Event::Key(KeyCode::Esc.into()),
-        ch_to_event('q'),
-        Event::Key(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)),
-    ]
-}
+pub const QUIT: KeyCode = KeyCode::Char('q');
 
-pub fn restart() -> Vec<Event> {
-    vec![ch_to_event('r')]
-}
+pub const RESTART: KeyCode = KeyCode::Char('r');
 
-pub fn reset() -> Vec<Event> {
-    vec![ch_to_event('R')]
-}
+pub const RESET: KeyCode = KeyCode::Char('R');
 
-pub fn next() -> Vec<Event> {
-    vec![ch_to_event('n')]
-}
-pub fn prev() -> Vec<Event> {
-    vec![ch_to_event('p')]
-}
+pub const NEXT: KeyCode = KeyCode::Char('n');
+pub const PREV: KeyCode = KeyCode::Char('p');
 
-pub fn bigger() -> Vec<Event> {
-    vec![ch_to_event('+')]
-}
-pub fn smaller() -> Vec<Event> {
-    vec![ch_to_event('-')]
-}
+pub const BIGGER: KeyCode = KeyCode::Char('+');
+pub const SMALLER: KeyCode = KeyCode::Char('-');
 
-pub fn help() -> Vec<Event> {
-    vec![ch_to_event('?')]
-}
+pub const HELP: KeyCode = KeyCode::Char('?');

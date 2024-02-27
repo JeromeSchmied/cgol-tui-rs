@@ -23,6 +23,8 @@ pub mod app;
 pub mod kmaps;
 /// Starting shapes
 pub mod shapes;
+/// ui
+pub mod ui;
 
 /// information about one `Cell`: either `Dead` or `Alive`
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -107,7 +109,7 @@ impl Universe {
             .filter(|cell| cell == &&Cell::Alive)
             .count();
 
-        println!("{}\r", &figur);
+        // println!("{}\r", &figur);
 
         if wh < figur.height() || wh < figur.width() {
             return Err(HandleError::TooBig);
@@ -121,7 +123,7 @@ impl Universe {
         };
 
         let (start_row, start_col) = ((wh - figur.height()) / 2, (wh - figur.width()) / 2);
-        println!("\r");
+        // println!("\r");
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
