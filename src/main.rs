@@ -1,9 +1,10 @@
-use crate::app::App;
-use conways_game_of_life_cli_rs::{app::CurrentScreen, *};
+use conways_game_of_life_cli_rs::{app::App, *};
 use crossterm::{
-    event::{self, poll, Event, KeyCode},
+    event::{self, poll, Event},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{
+        disable_raw_mode, enable_raw_mode, size, EnterAlternateScreen, LeaveAlternateScreen,
+    },
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
@@ -12,9 +13,6 @@ use ratatui::{
 use std::io;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("{}", HELP);
-    io::stdin().read_line(&mut String::new())?;
-
     enable_raw_mode()?;
     execute!(io::stdout(), EnterAlternateScreen)?;
 
@@ -22,7 +20,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
-    let mut app = App::default();
+    let wh = size()?;
+    let mut app = App::new(wh.1 - 4);
+    // app.set_width(wh.0 + 3);
+    // app.set_height(wh.1 - 3);
+    // app.set_wh(wh.1 + 1 - 5);
+    // app.set_height(38);
+    // app.set_width(DEF_WH + 2);
+    // app.set_height(DEF_WH + 2);
+
     let res = run_app(&mut terminal, &mut app);
 
     disable_raw_mode()?;
@@ -32,6 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(err) = res {
         println!("Error: {err:?}");
     }
+    eprintln!("initial size was: {wh:?}");
 
     Ok(())
 }
@@ -40,50 +47,45 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
     let mut prev_poll_t = app.poll_t();
 
     loop {
+        let wh = size()?;
+        app.set_wh(wh.1 + 1 - 5);
+
         terminal.draw(|f| ui::ui(f, app))?;
 
         // Wait up to `poll_t` for another event
         if poll(app.poll_t())? {
             if let Event::Key(key) = event::read()? {
-                match app.current_screen {
-                    CurrentScreen::Main => match key.code {
-                        kmaps::QUIT => {
-                            eprintln!("Quitting...\r");
-                            break;
-                        }
-                        kmaps::SLOWER => {
-                            app.slower(false);
-                        }
-                        kmaps::FASTER => {
-                            app.faster(false);
-                        }
-                        kmaps::PLAY_PAUSE => {
-                            app.play_pause(&mut prev_poll_t);
-                        }
-                        kmaps::RESTART => {
-                            app.restart();
-                        }
-                        kmaps::NEXT => {
-                            app.next();
-                        }
-                        kmaps::PREV => {
-                            app.prev();
-                        }
-                        kmaps::RESET => {
-                            *app = app::App::default();
-                        }
-                        kmaps::HELP => {
-                            app.current_screen = CurrentScreen::Help;
-                        }
-                        _ => {}
-                    },
-                    CurrentScreen::Help => match key.code {
-                        kmaps::HELP | kmaps::QUIT | KeyCode::Esc => {
-                            app.current_screen = CurrentScreen::Main;
-                        }
-                        _ => {}
-                    },
+                match key.code {
+                    kmaps::QUIT => {
+                        break;
+                    }
+                    kmaps::SLOWER => {
+                        app.slower(false);
+                    }
+                    kmaps::FASTER => {
+                        app.faster(false);
+                    }
+                    kmaps::PLAY_PAUSE => {
+                        app.play_pause(&mut prev_poll_t);
+                    }
+                    kmaps::RESTART => {
+                        app.restart();
+                    }
+                    kmaps::NEXT => {
+                        app.next();
+                    }
+                    kmaps::PREV => {
+                        app.prev();
+                    }
+                    kmaps::RESET => {
+                        *app = app::App::default();
+                    }
+                    _ => {}
                 }
+            } else {
+                let wh = size()?;
+                app.set_wh(wh.1 + 1 - 5);
+                app.restart();
             }
         } else {
             // Timeout expired, updating life state

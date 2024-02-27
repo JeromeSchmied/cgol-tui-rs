@@ -4,18 +4,7 @@ use std::{fmt, time::Duration};
 /// Default poll duration
 pub const DEF_DUR: Duration = Duration::from_millis(400);
 /// Default Width and Height
-pub const DEF_WH: u32 = 32;
-/// Help message
-pub const HELP: &str = r#"Blocking poll() & non-blocking read()
- - Prints current state of Conway's Game of Life if there's no event
- - Use Esc or `q` to quit
- - `j`, `k`: decreasing, increasing speed
- - press Space to pause, play
- - hit `n` to switch to next shape
- - if you want to restart, push `r`
- - to reset everything to starting phase, hit `R`
- - and now, press Enter to continue
-"#;
+pub const DEF_WH: u16 = 32;
 
 /// App
 pub mod app;
@@ -44,18 +33,18 @@ impl Cell {
 /// the `Universe` in which game plays. Represented as a `Vec` of `Cell`s.
 #[derive(Debug)]
 pub struct Universe {
-    width: u32,
-    height: u32,
+    width: u16,
+    height: u16,
     cells: Vec<Cell>,
 }
 
 impl Universe {
     /// Convert (x;y) to index
-    fn get_index(&self, row: u32, col: u32) -> usize {
+    fn get_index(&self, row: u16, col: u16) -> usize {
         (row * self.width + col) as usize
     }
 
-    fn live_neighbour_count(&self, row: u32, col: u32) -> u8 {
+    fn live_neighbour_count(&self, row: u16, col: u16) -> u8 {
         let mut sum = 0;
 
         for delta_row in [self.height - 1, 0, 1] {
@@ -90,8 +79,8 @@ impl Universe {
         }
 
         Universe {
-            width: s[0].len() as u32,
-            height: s.len() as u32,
+            width: s[0].len() as u16,
+            height: s.len() as u16,
             cells,
         }
     }
@@ -101,7 +90,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(wh: u32, figur: &[String]) -> Result<Universe, HandleError> {
+    pub fn from_figur(wh: u16, figur: &[String]) -> Result<Universe, HandleError> {
         let figur = Universe::from_vec_str(figur);
         let figur_alive = figur
             .cells
@@ -127,7 +116,7 @@ impl Universe {
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
-            let idx = univ.get_index(row as u32, start_col);
+            let idx = univ.get_index(row as u16, start_col);
             for i in 0..figur.width() as usize {
                 univ.cells[idx + i] = figur.cells[j];
                 j += 1;
@@ -180,33 +169,45 @@ impl Universe {
         self.cells = next;
     }
 
-    pub fn width(&self) -> u32 {
+    pub fn width(&self) -> u16 {
         self.width
     }
 
-    pub fn height(&self) -> u32 {
+    pub fn height(&self) -> u16 {
         self.height
     }
 
     /// toggles cell at (`row`;`col`)
-    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+    pub fn toggle_cell(&mut self, row: u16, col: u16) {
         let idx = self.get_index(row, col);
         self.cells[idx].toggle();
     }
 }
 
+// impl fmt::Display for Universe {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
+//         for line in self.cells.as_slice().chunks(self.width as usize) {
+//             write!(f, "│")?;
+//             for &cell in line {
+//                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
+//                 write!(f, "{symbol} ")?;
+//             }
+//             writeln!(f, "│\r")?;
+//         }
+//         writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
+//         Ok(())
+//     }
+// }
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
         for line in self.cells.as_slice().chunks(self.width as usize) {
-            write!(f, "│")?;
             for &cell in line {
                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
                 write!(f, "{symbol} ")?;
             }
-            writeln!(f, "│\r")?;
+            writeln!(f)?;
         }
-        writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
         Ok(())
     }
 }

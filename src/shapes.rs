@@ -1,7 +1,7 @@
 use super::*;
 
 /// Number of currently supported shapes
-pub const N: u8 = 8;
+pub const N: u8 = 9;
 
 #[derive(Debug)]
 pub enum HandleError {
@@ -16,7 +16,7 @@ pub enum HandleError {
 ///
 /// `from_figur()`
 /// `IndexOutOfRange`
-pub fn get(wh: u32, i: usize) -> Result<Universe, HandleError> {
+pub fn get(wh: u16, i: usize) -> Result<Universe, HandleError> {
     if i > shapes::N as usize {
         return Err(HandleError::OutOfRange);
     }
@@ -28,15 +28,17 @@ pub fn get(wh: u32, i: usize) -> Result<Universe, HandleError> {
 
         2 => Universe::from_figur(wh, &shapes::gosper_glider_gun()),
 
-        3 => Ok(shapes::stripes(wh, wh)),
+        3 => Ok(shapes::stripes(wh)),
 
-        4 => Ok(shapes::rand(wh, wh)),
+        4 => Ok(shapes::rand(wh)),
 
         5 => Universe::from_figur(wh, &shapes::rabbits()),
 
         6 => Universe::from_figur(wh, &shapes::bonk_tie()),
 
         7 => Universe::from_figur(wh, &shapes::acorn()),
+
+        8 => Ok(shapes::full(wh)),
 
         _ => Err(HandleError::OutOfRange),
     }
@@ -134,8 +136,8 @@ pub fn acorn() -> Vec<String> {
     ["_#_____".into(), "___#___".into(), "##__###".into()].to_vec()
 }
 
-pub fn rand(width: u32, height: u32) -> Universe {
-    let cells = (0..width * height)
+pub fn rand(wh: u16) -> Universe {
+    let cells = (0..wh * wh)
         .map(|_i| {
             if fastrand::bool() {
                 Cell::Alive
@@ -145,14 +147,14 @@ pub fn rand(width: u32, height: u32) -> Universe {
         })
         .collect();
     Universe {
-        width,
-        height,
+        width: wh,
+        height: wh,
         cells,
     }
 }
 
-pub fn stripes(width: u32, height: u32) -> Universe {
-    let cells = (0..width * height)
+pub fn stripes(wh: u16) -> Universe {
+    let cells = (0..wh * wh)
         .map(|i| {
             if i % 2 == 0 || i % 7 == 0 {
                 Cell::Alive
@@ -162,8 +164,17 @@ pub fn stripes(width: u32, height: u32) -> Universe {
         })
         .collect();
     Universe {
-        width,
-        height,
+        width: wh,
+        height: wh,
+        cells,
+    }
+}
+
+pub fn full(wh: u16) -> Universe {
+    let cells = vec![Cell::Alive; wh as usize * wh as usize];
+    Universe {
+        width: wh,
+        height: wh,
         cells,
     }
 }
