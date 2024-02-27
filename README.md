@@ -8,6 +8,11 @@ clone the repo and run `cargo r`
 
 ![Sample][1]
 
+## todos
+
+-   [x] initial tui support
+-   [ ] error handling
+
 ## License
 
 Licensed under either of
