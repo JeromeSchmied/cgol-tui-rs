@@ -1,3 +1,6 @@
+use crate::shapes::HandleError;
+use std::{fmt, time::Duration};
+
 /// Default poll duration
 pub const DEF_DUR: Duration = Duration::from_millis(400);
 /// Default Width and Height
@@ -190,9 +193,6 @@ impl Universe {
     }
 }
 
-use crate::{app::App, shapes::HandleError};
-use std::{fmt, time::Duration};
-
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
@@ -207,79 +207,4 @@ impl fmt::Display for Universe {
         writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
         Ok(())
     }
-}
-
-use crossterm::{
-    cursor::MoveTo,
-    event::{poll, read},
-    execute,
-    terminal::{Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
-};
-use std::io;
-
-pub fn run() -> io::Result<()> {
-    execute!(io::stdout(), EnterAlternateScreen)?;
-
-    let mut app = App::default();
-
-    let mut prev_poll_t = app.poll_t();
-
-    loop {
-        // Wait up to `poll_t` for another event
-        if poll(app.poll_t())? {
-            // It's guaranteed that read() won't block if `poll` returns `Ok(true)`
-            let event = read()?;
-
-            if kmaps::quit().contains(&event) {
-                println!("Quitting...\r");
-                break;
-            } else if kmaps::slower().contains(&event) {
-                if !app.paused() {
-                    app.slower(false);
-                }
-                println!("poll time is now: {:?}\r", app.poll_t());
-            } else if kmaps::faster().contains(&event) {
-                if !app.paused() {
-                    app.faster(false);
-                }
-
-                println!("poll time is now: {:?}\r", app.poll_t());
-            } else if kmaps::slower_big().contains(&event) {
-                if !app.paused() {
-                    app.slower(true);
-                }
-                println!("poll time is now: {:?}\r", app.poll_t());
-            } else if kmaps::faster_big().contains(&event) {
-                if !app.paused() {
-                    app.faster(true);
-                }
-                println!("poll time is now: {:?}\r", app.poll_t());
-            } else if kmaps::play_pause().contains(&event) {
-                app.play_pause(&mut prev_poll_t);
-            } else if kmaps::restart().contains(&event) {
-                app.restart();
-            } else if kmaps::next().contains(&event) {
-                app.next();
-            } else if kmaps::prev().contains(&event) {
-                app.prev();
-            } else if kmaps::smaller().contains(&event) {
-                app.smaller();
-            } else if kmaps::bigger().contains(&event) {
-                app.bigger();
-            } else if kmaps::reset().contains(&event) {
-                app = app::App::default();
-            } else {
-                eprintln!("Unknown event: {event:?}\r");
-            }
-        } else {
-            // Timeout expired, updating life state
-            execute!(io::stdout(), MoveTo(0, 0), Clear(ClearType::All))?;
-            app.render_universe();
-            app.tick();
-        }
-    }
-
-    execute!(io::stdout(), LeaveAlternateScreen)?;
-
-    Ok(())
 }

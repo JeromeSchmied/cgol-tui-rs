@@ -58,3 +58,7 @@ pub fn bigger() -> Vec<Event> {
 pub fn smaller() -> Vec<Event> {
     vec![ch_to_event('-')]
 }
+
+pub fn help() -> Vec<Event> {
+    vec![ch_to_event('?')]
+}

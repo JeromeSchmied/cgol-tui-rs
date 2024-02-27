@@ -1,12 +1,18 @@
 use crate::{shapes, Universe, DEF_DUR};
 use std::time::Duration;
 
+pub enum CurrentScreen {
+    Main,
+    Help,
+}
+
 pub struct App {
     universe: Universe,
     pub wh: u32,
     i: usize,
     poll_t: Duration,
     paused: bool,
+    current_screen: CurrentScreen,
 }
 impl Default for App {
     fn default() -> Self {
@@ -18,6 +24,7 @@ impl Default for App {
             i,
             poll_t: DEF_DUR,
             paused: false,
+            current_screen: CurrentScreen::Main,
         }
     }
 }
@@ -52,7 +59,7 @@ impl App {
             self.universe = shape;
             self.wh -= 1;
         } else {
-            eprintln!("Couldn't make smaller");
+            eprintln!("couldn't make smaller");
         }
     }
     pub fn bigger(&mut self) {
@@ -102,7 +109,7 @@ impl App {
         if let Ok(shape) = shapes::get(self.wh, self.i) {
             self.universe = shape;
         } else {
-            eprintln!("Couldn't switch to previous shape\r");
+            eprintln!("couldn't switch to previous shape\r");
         }
     }
 }
