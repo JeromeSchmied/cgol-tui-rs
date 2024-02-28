@@ -11,7 +11,9 @@ clone the repo and run `cargo r`
 ## todos
 
 -   [x] initial tui support
--   [ ] error handling
+-   [ ] renaming on gh
+-   [x] error handling
+-   [ ] publishing to crates.io?
 
 ## License
 
