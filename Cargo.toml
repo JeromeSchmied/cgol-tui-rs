@@ -7,6 +7,7 @@ description = "Conway's Game of Life implementation with a TUI"
 license = "MIT OR Apache-2.0"
 documentation = "https://docs.rs/cgol-tui"
 repository = "https://github.com/JeromeSchmied/cgol-tui-rs"
+keywords = ["conway", "game-of-life", "tui"]
 
 [dependencies]
 crossterm = "0.27.0"
