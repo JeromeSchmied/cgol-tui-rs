@@ -41,7 +41,7 @@ pub struct Universe {
 impl Universe {
     /// Convert (x;y) to index
     fn get_index(&self, row: u16, col: u16) -> usize {
-        (row * self.width + col) as usize
+        (row as u32 * self.width as u32 + col as u32) as usize
     }
 
     fn live_neighbour_count(&self, row: u16, col: u16) -> u8 {
@@ -104,7 +104,7 @@ impl Universe {
             return Err(HandleError::TooBig);
         }
 
-        let cells = (0..wh * wh).map(|_i| Cell::Dead).collect();
+        let cells = (0..wh as u32 * wh as u32).map(|_i| Cell::Dead).collect();
         let mut univ = Universe {
             cells,
             width: wh,

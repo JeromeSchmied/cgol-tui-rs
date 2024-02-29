@@ -63,7 +63,8 @@ impl App {
         self.paused = !self.paused;
     }
     pub fn restart(&mut self) {
-        self.universe = shapes::get(self.wh(), self.i).unwrap();
+        self.universe =
+            shapes::get(self.wh(), self.i).expect("display area is too small to fit current shape");
     }
 
     pub fn tick(&mut self) {

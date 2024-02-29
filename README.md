@@ -8,12 +8,16 @@ clone the repo and run `cargo r`
 
 ![Sample][1]
 
-## todos
+## Todos
 
 -   [x] initial tui support
 -   [x] renaming on gh
 -   [x] error handling
 -   [x] publishing to crates.io
+
+## Warning!
+
+If your terminal is messed up by accident fix: on Mac, Linux: `reset`, on Windows: exit the app.
 
 ## Acknowledgements
 

@@ -10,9 +10,18 @@ use ratatui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
-use std::io;
+use std::{io, panic};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Define a custom panic hook to reset the terminal properties.
+    // This way, you won't have your terminal messed up if an unexpected error happens.
+    let panic_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic| {
+        disable_raw_mode().expect("couldn't disable raw_mode");
+        execute!(io::stdout(), LeaveAlternateScreen).expect("couldn't leave alternate screen");
+        panic_hook(panic);
+    }));
+
     // init terminal
     enable_raw_mode()?;
     execute!(io::stdout(), EnterAlternateScreen)?;
