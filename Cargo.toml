@@ -1,5 +1,5 @@
 [package]
-name = "conways-game-of-life-cli-rs"
+name = "conways-game-of-life-tui"
 version = "0.1.0"
 authors = ["Jeromos Kovacs <iITsnot.me214@proton.me>"]
 edition = "2018"

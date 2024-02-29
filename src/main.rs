@@ -1,4 +1,4 @@
-use conways_game_of_life_cli_rs::{app::App, *};
+use conways_game_of_life_tui::{app::App, *};
 use crossterm::{
     event::{self, poll, Event},
     execute,
