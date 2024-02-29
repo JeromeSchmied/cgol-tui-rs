@@ -13,24 +13,20 @@ use ratatui::{
 use std::io;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // init terminal
     enable_raw_mode()?;
     execute!(io::stdout(), EnterAlternateScreen)?;
 
     let backend = CrosstermBackend::new(io::stdout());
     let mut terminal = Terminal::new(backend)?;
 
-    // create app and run it
+    // create app and run it with width and height from terminal size
     let wh = size()?;
     let mut app = App::new(wh.1 - 4);
-    // app.set_width(wh.0 + 3);
-    // app.set_height(wh.1 - 3);
-    // app.set_wh(wh.1 + 1 - 5);
-    // app.set_height(38);
-    // app.set_width(DEF_WH + 2);
-    // app.set_height(DEF_WH + 2);
 
     let res = run_app(&mut terminal, &mut app);
 
+    // reset terminal
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
@@ -38,7 +34,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(err) = res {
         println!("Error: {err:?}");
     }
-    eprintln!("initial size was: {wh:?}");
 
     Ok(())
 }
@@ -83,6 +78,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     _ => {}
                 }
             } else {
+                // resize and restart
                 let wh = size()?;
                 app.set_wh(wh.1 + 1 - 5);
                 app.restart();

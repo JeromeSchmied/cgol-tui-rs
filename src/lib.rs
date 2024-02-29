@@ -177,6 +177,7 @@ impl Universe {
         self.height
     }
 
+    // unused
     /// toggles cell at (`row`;`col`)
     pub fn toggle_cell(&mut self, row: u16, col: u16) {
         let idx = self.get_index(row, col);
@@ -199,6 +200,7 @@ impl Universe {
 //         Ok(())
 //     }
 // }
+
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for line in self.cells.as_slice().chunks(self.width as usize) {

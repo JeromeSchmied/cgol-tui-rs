@@ -16,7 +16,7 @@ pub fn ui(f: &mut Frame, app: &App) {
     // |____________________|
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(4), Constraint::Length(1)])
+        .constraints([Constraint::Min(0), Constraint::Length(1)])
         .split(f.size());
 
     // let current_shape = shapes::get(app.wh, app.i()).unwrap();

@@ -15,6 +15,10 @@ clone the repo and run `cargo r`
 -   [x] error handling
 -   [x] publishing to crates.io
 
+## Acknowledgements
+
+The core of this app is adapted from the great [Rust-Wasm tutorial](https://rustwasm.github.io/docs/book/).
+
 ## License
 
 Licensed under either of

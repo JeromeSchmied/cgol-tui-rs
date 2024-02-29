@@ -100,7 +100,7 @@ impl App {
         if let Ok(shape) = shapes::get(self.wh(), self.i) {
             self.universe = shape;
         } else {
-            eprintln!("couldn't switch to next shape\r");
+            eprintln!("couldn't switch to next shape");
         }
     }
     pub fn prev(&mut self) {
@@ -112,7 +112,7 @@ impl App {
         if let Ok(shape) = shapes::get(self.wh(), self.i) {
             self.universe = shape;
         } else {
-            eprintln!("couldn't switch to previous shape\r");
+            eprintln!("couldn't switch to previous shape");
         }
     }
 }
