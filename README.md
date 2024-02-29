@@ -11,9 +11,9 @@ clone the repo and run `cargo r`
 ## todos
 
 -   [x] initial tui support
--   [ ] renaming on gh
+-   [x] renaming on gh
 -   [x] error handling
--   [ ] publishing to crates.io?
+-   [x] publishing to crates.io
 
 ## License
 
@@ -31,4 +31,4 @@ submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
 conditions.
 
-[1]: assets/0.1.0_gosper_glider_gun.png "Image of using cgol-cli-rs in Alacritty on Arch Linux"
+[1]: assets/0.2.0_stripes.png "Image of using cgol-cli-rs in Alacritty on Arch Linux"
