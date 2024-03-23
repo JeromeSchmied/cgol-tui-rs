@@ -1,6 +1,6 @@
 use cgol_tui::{app::App, *};
 use crossterm::{
-    event::{self, poll, Event},
+    event::{self, poll, Event, KeyEventKind},
     execute,
     terminal::{
         disable_raw_mode, enable_raw_mode, size, EnterAlternateScreen, LeaveAlternateScreen,
@@ -59,6 +59,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
         // Wait up to `poll_t` for another event
         if poll(app.poll_t())? {
             if let Event::Key(key) = event::read()? {
+                if key.kind != KeyEventKind::Press {
+                    return Ok(());
+                }
                 match key.code {
                     kmaps::QUIT => {
                         break;
