@@ -14,6 +14,7 @@ clone the repo and run `cargo r`
 -   [x] renaming on gh
 -   [x] error handling
 -   [x] publishing to crates.io
+-   [ ] changing to `Canvas` for rendering viewer block
 
 ## Warning!
 
