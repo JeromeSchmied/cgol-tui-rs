@@ -53,10 +53,8 @@ impl App {
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
         if self.paused() {
-            // println!("Resuming: poll() = {:?}\r", prev_poll_t);
             self.poll_t = *prev_poll_t;
         } else {
-            // println!("Pausing...\r");
             *prev_poll_t = self.poll_t;
             self.poll_t = Duration::MAX;
         }
@@ -79,7 +77,6 @@ impl App {
                 .checked_sub(self.poll_t.checked_div(div).unwrap_or(DEF_DUR))
                 .unwrap_or(DEF_DUR);
         }
-        // println!("poll time is now: {:?}\r", self.poll_t());
     }
     pub fn slower(&mut self, big: bool) {
         if !self.paused {
@@ -89,7 +86,6 @@ impl App {
                 .checked_add(self.poll_t.checked_div(div).unwrap_or(DEF_DUR))
                 .unwrap_or(DEF_DUR);
         }
-        // println!("poll time is now: {:?}\r", self.poll_t());
     }
 
     pub fn next(&mut self) {
