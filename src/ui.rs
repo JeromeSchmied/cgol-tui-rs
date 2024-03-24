@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::{Line, Span},
-    widgets::{Block, BorderType, Borders, Paragraph},
+    widgets::{canvas::Canvas, Block, BorderType, Borders, Paragraph},
     Frame,
 };
 
@@ -28,17 +28,25 @@ pub fn ui(f: &mut Frame, app: &App) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .title("Conway's Game of Life");
-    let universe = Paragraph::new(app.universe.to_string()).block(cgol);
+    // let universe = Paragraph::new(app.universe.to_string()).block(cgol);
+    // let universe = Canvas::new().block(cgol);
+    let universe = Canvas::default()
+        // .x_bounds([0., main_chunks[0].height as f64 * 2. - 4.])
+        // .y_bounds([0., main_chunks[0].height as f64 * 2. - 4.])
+        .paint(|ctx| ctx.draw(&app.universe))
+        .block(cgol);
 
-    f.render_widget(
-        universe,
-        Rect::new(
-            0,
-            0,
-            main_chunks[0].height * 2 - 4,
-            main_chunks[0].height - 1,
-        ),
-    );
+    f.render_widget(universe, main_chunks[0]);
+
+    // f.render_widget(
+    //     universe,
+    //     Rect::new(
+    //         0,
+    //         0,
+    //         main_chunks[0].height * 2 - 4,
+    //         main_chunks[0].height - 1,
+    //     ),
+    // );
 
     let footer = Layout::default()
         .direction(Direction::Horizontal)

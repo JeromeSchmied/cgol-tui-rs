@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // create app and run it with width and height from terminal size
     let wh = size()?;
-    let mut app = App::new(wh.1 - 4);
+    let mut app = App::new((wh.1 + 10) * 3);
 
     let res = run_app(&mut terminal, &mut app);
 
@@ -52,7 +52,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
 
     loop {
         let wh = size()?;
-        app.set_wh(wh.1 + 1 - 5);
+        app.set_wh((wh.1 + 10) * 3);
 
         terminal.draw(|f| ui::ui(f, app))?;
 
@@ -92,7 +92,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
             } else {
                 // resize and restart
                 let wh = size()?;
-                app.set_wh(wh.1 + 1 - 5);
+                app.set_wh((wh.1 + 10) * 3);
                 app.restart();
             }
         } else {

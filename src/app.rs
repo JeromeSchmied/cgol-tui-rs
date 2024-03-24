@@ -41,9 +41,9 @@ impl App {
     pub fn i(&self) -> usize {
         self.i
     }
-    pub fn render_universe(&self) {
-        println!("{}", self.universe);
-    }
+    // pub fn render_universe(&self) {
+    //     println!("{}", self.universe);
+    // }
     pub fn wh(&self) -> u16 {
         self.wh
     }

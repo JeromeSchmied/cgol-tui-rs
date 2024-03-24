@@ -1,3 +1,5 @@
+use ratatui::{style::Color, widgets::canvas::Shape};
+
 use crate::shapes::HandleError;
 use std::{fmt, time::Duration};
 
@@ -182,15 +184,31 @@ impl Universe {
     }
 }
 
-impl fmt::Display for Universe {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for line in self.cells.as_slice().chunks(self.width as usize) {
-            for &cell in line {
-                let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
-                write!(f, "{symbol} ")?;
+impl Shape for Universe {
+    fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                match self.cells.get(self.get_index(x, y)).unwrap() {
+                    Cell::Alive => painter.paint(y.into(), x.into(), Color::White),
+                    Cell::Dead => continue,
+                }
             }
-            writeln!(f)?;
         }
-        Ok(())
     }
 }
+
+// impl fmt::Display for Universe {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
+//         for line in self.cells.as_slice().chunks(self.width as usize) {
+//             write!(f, "│")?;
+//             for &cell in line {
+//                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
+//                 write!(f, "{symbol} ")?;
+//             }
+//             writeln!(f, "│\r")?;
+//         }
+//         writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
+//         Ok(())
+//     }
+// }
