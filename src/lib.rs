@@ -1,12 +1,12 @@
 use ratatui::{style::Color, widgets::canvas::Shape};
 
 use crate::shapes::HandleError;
-use std::{fmt, time::Duration};
+use std::time::Duration;
 
 /// Default poll duration
 pub const DEF_DUR: Duration = Duration::from_millis(400);
 /// Default Width and Height
-pub const DEF_WH: u16 = 32;
+// pub const DEF_WH: u16 = 32;
 
 /// App
 pub mod app;
