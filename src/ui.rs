@@ -38,6 +38,16 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     f.render_widget(universe, main_chunks[0]);
 
+    f.render_widget(
+        universe,
+        Rect::new(
+            0,
+            0,
+            main_chunks[0].height * 2 - 4,
+            main_chunks[0].height - 1,
+        ),
+    );
+
     let footer = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(100)])
