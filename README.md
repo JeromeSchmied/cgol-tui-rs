@@ -14,7 +14,7 @@ clone the repo and run `cargo r`
 -   [x] renaming on gh
 -   [x] error handling
 -   [x] publishing to crates.io
--   [ ] changing to `Canvas` for rendering viewer block
+-   [x] changing to `Canvas` for rendering viewer block
 
 ## Warning!
 
@@ -40,4 +40,4 @@ submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
 conditions.
 
-[1]: assets/0.2.0_stripes.png "Image of using cgol-cli-rs in Alacritty on Arch Linux"
+[1]: assets/0.3.0_stripes.png "Image of using cgol-cli-rs in Alacritty on Arch Linux"

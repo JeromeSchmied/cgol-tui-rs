@@ -51,8 +51,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
     let mut prev_poll_t = app.poll_t();
 
     loop {
-        let wh = size()?;
-        app.set_wh((wh.1 + 10) * 3);
+        app.set_wh();
 
         terminal.draw(|f| ui::ui(f, app))?;
 
@@ -91,8 +90,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 }
             } else {
                 // resize and restart
-                let wh = size()?;
-                app.set_wh((wh.1 + 10) * 3);
+                app.set_wh();
                 app.restart();
             }
         } else {

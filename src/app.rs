@@ -1,4 +1,6 @@
-use crate::{shapes, Universe, DEF_DUR, DEF_WH};
+use crossterm::terminal::size;
+
+use crate::{shapes, Universe, DEF_DUR};
 use std::time::Duration;
 
 pub struct App {
@@ -11,7 +13,8 @@ pub struct App {
 impl Default for App {
     fn default() -> Self {
         let i = 0;
-        let wh = DEF_WH;
+        let wh = size().expect("couldn't get terminal size");
+        let wh = (wh.1 + 10) * 3;
         App {
             wh,
             universe: shapes::get(wh, i).unwrap(),
@@ -47,8 +50,9 @@ impl App {
     pub fn wh(&self) -> u16 {
         self.wh
     }
-    pub fn set_wh(&mut self, wh: u16) {
-        self.wh = wh;
+    pub fn set_wh(&mut self) {
+        let wh = size().expect("couldn't get terminal size");
+        self.wh = (wh.1 + 10) * 3;
     }
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
