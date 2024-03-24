@@ -73,7 +73,7 @@ impl Universe {
                 } else if ch == '_' || ch == ' ' || ch == '0' {
                     cells.push(Cell::Dead);
                 } else {
-                    eprintln!("Can't do nothing with this character: {ch}");
+                    eprintln!("can't do nothing with this character: {ch}");
                 }
             }
         }
@@ -98,8 +98,6 @@ impl Universe {
             .filter(|cell| cell == &&Cell::Alive)
             .count();
 
-        // println!("{}\r", &figur);
-
         if wh < figur.height() || wh < figur.width() {
             return Err(HandleError::TooBig);
         }
@@ -112,7 +110,6 @@ impl Universe {
         };
 
         let (start_row, start_col) = ((wh - figur.height()) / 2, (wh - figur.width()) / 2);
-        // println!("\r");
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
@@ -184,22 +181,6 @@ impl Universe {
         self.cells[idx].toggle();
     }
 }
-
-// impl fmt::Display for Universe {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
-//         for line in self.cells.as_slice().chunks(self.width as usize) {
-//             write!(f, "│")?;
-//             for &cell in line {
-//                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
-//                 write!(f, "{symbol} ")?;
-//             }
-//             writeln!(f, "│\r")?;
-//         }
-//         writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
-//         Ok(())
-//     }
-// }
 
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
