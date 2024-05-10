@@ -48,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<()> {
-    let mut prev_poll_t = app.poll_t();
+    let mut prev_poll_t = app.poll_t;
 
     loop {
         app.set_wh();
@@ -56,7 +56,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
         terminal.draw(|f| ui::ui(f, app))?;
 
         // Wait up to `poll_t` for another event
-        if poll(app.poll_t())? {
+        if poll(app.poll_t)? {
             if let Event::Key(key) = event::read()? {
                 if key.kind != KeyEventKind::Press {
                     return Ok(());
