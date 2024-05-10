@@ -59,10 +59,10 @@ pub fn ui(f: &mut Frame, app: &App) {
 
     let poll_t = format!(
         "Poll time: {}",
-        if let std::time::Duration::MAX = app.poll_t() {
+        if let std::time::Duration::MAX = app.poll_t {
             "max".into()
         } else {
-            format!("{:.0?}", app.poll_t())
+            format!("{:.0?}", app.poll_t)
         }
     )
     .light_blue();
