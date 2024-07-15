@@ -24,6 +24,7 @@ pub enum Cell {
     Alive = 1,
 }
 impl Cell {
+    #[allow(unused)]
     fn toggle(&mut self) {
         *self = match *self {
             Cell::Dead => Cell::Alive,
@@ -33,17 +34,41 @@ impl Cell {
 }
 
 /// the `Universe` in which game plays. Represented as a `Vec` of `Cell`s.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Universe {
     width: u16,
     height: u16,
     cells: Vec<Cell>,
 }
+impl<U1: Into<usize>, U2: Into<usize>> std::ops::Index<(U1, U2)> for Universe {
+    type Output = Cell;
+
+    fn index(&self, idx: (U1, U2)) -> &Self::Output {
+        let row = idx.0.into();
+        let col = idx.1.into();
+        // Convert (x;y) to index
+        let idx = self.get_idx(row, col);
+
+        &self.cells[idx]
+    }
+}
+impl<U1: Into<usize>, U2: Into<usize>> std::ops::IndexMut<(U1, U2)> for Universe {
+    fn index_mut(&mut self, idx: (U1, U2)) -> &mut Self::Output {
+        let row = idx.0.into();
+        let col = idx.1.into();
+        // Convert (x;y) to index
+        let idx = self.get_idx(row, col);
+
+        &mut self.cells[idx]
+    }
+}
 
 impl Universe {
-    /// Convert (x;y) to index
-    fn get_index(&self, row: u16, col: u16) -> usize {
-        (row as u32 * self.width as u32 + col as u32) as usize
+    fn get_idx<U1: Into<usize>, U2: Into<usize>>(&self, row: U1, col: U2) -> usize {
+        let row = row.into();
+        let col = col.into();
+        // Convert (x;y) to index
+        (row * self.width as usize) + col
     }
 
     fn live_neighbour_count(&self, row: u16, col: u16) -> u8 {
@@ -57,8 +82,8 @@ impl Universe {
 
                 let neighbour_row = (row + delta_row) % self.height;
                 let neighbour_col = (col + delta_col) % self.width;
-                let idx = self.get_index(neighbour_row, neighbour_col);
-                sum += self.cells[idx] as u8;
+
+                sum += self[(neighbour_row, neighbour_col)] as u8;
             }
         }
         sum
@@ -115,9 +140,8 @@ impl Universe {
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
-            let idx = univ.get_index(row as u16, start_col);
             for i in 0..figur.width() as usize {
-                univ.cells[idx + i] = figur.cells[j];
+                univ[(row, start_col as usize + i)] = figur.cells[j];
                 j += 1;
             }
         }
@@ -136,12 +160,12 @@ impl Universe {
 
     /// update life: `Universe`
     pub fn tick(&mut self) {
-        let mut next = self.cells.clone();
+        let mut next = self.clone();
 
         for row in 0..self.width {
             for col in 0..self.height {
-                let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
+                let idx = (row, col);
+                let cell = self[idx];
                 let live_neighbours = self.live_neighbour_count(row, col);
 
                 let next_cell = match (cell, live_neighbours) {
@@ -165,7 +189,7 @@ impl Universe {
             }
         }
 
-        self.cells = next;
+        *self = next;
     }
 
     pub fn width(&self) -> u16 {
@@ -175,20 +199,13 @@ impl Universe {
     pub fn height(&self) -> u16 {
         self.height
     }
-
-    // unused
-    /// toggles cell at (`row`;`col`)
-    pub fn toggle_cell(&mut self, row: u16, col: u16) {
-        let idx = self.get_index(row, col);
-        self.cells[idx].toggle();
-    }
 }
 
 impl Shape for Universe {
     fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
         for y in 0..self.height {
             for x in 0..self.width {
-                match self.cells.get(self.get_index(x, y)).unwrap() {
+                match self[(x, y)] {
                     Cell::Alive => painter.paint(y.into(), x.into(), Color::White),
                     Cell::Dead => continue,
                 }
