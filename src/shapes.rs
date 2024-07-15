@@ -105,10 +105,12 @@ pub fn gosper_glider_gun() -> Vec<String> {
     .to_vec()
 }
 
+/// 3x3
 pub fn featherweigth_spaceship() -> Vec<String> {
     ["__#".into(), "#_#".into(), "_##".into()].to_vec()
 }
 
+/// 8x4
 pub fn rabbits() -> Vec<String> {
     [
         "#_____#_".into(),
@@ -136,6 +138,7 @@ pub fn acorn() -> Vec<String> {
     ["_#_____".into(), "___#___".into(), "##__###".into()].to_vec()
 }
 
+/// `wh`x`wh`
 pub fn rand(wh: u16) -> Universe {
     let cells = (0..wh * wh)
         .map(|_i| {
@@ -153,6 +156,7 @@ pub fn rand(wh: u16) -> Universe {
     }
 }
 
+/// `wh`x`wh`
 pub fn stripes(wh: u16) -> Universe {
     let cells = (0..wh * wh)
         .map(|i| {
@@ -170,6 +174,7 @@ pub fn stripes(wh: u16) -> Universe {
     }
 }
 
+/// `wh`x`wh`
 pub fn full(wh: u16) -> Universe {
     let cells = vec![Cell::Alive; wh as usize * wh as usize];
     Universe {

@@ -18,10 +18,20 @@ pub mod shapes;
 pub mod ui;
 
 /// information about one `Cell`: either `Dead` or `Alive`
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum Cell {
+    #[default]
     Dead = 0,
     Alive = 1,
+}
+impl From<bool> for Cell {
+    fn from(alive: bool) -> Self {
+        if alive {
+            Self::Alive
+        } else {
+            Self::Dead
+        }
+    }
 }
 impl Cell {
     #[allow(unused)]
@@ -34,7 +44,7 @@ impl Cell {
 }
 
 /// the `Universe` in which game plays. Represented as a `Vec` of `Cell`s.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Universe {
     width: u16,
     height: u16,
@@ -117,7 +127,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(wh: u16, figur: &[String]) -> Result<Universe, HandleError> {
+    fn from_figur(wh: u16, figur: &[String]) -> Result<Universe, HandleError> {
         let figur = Universe::from_vec_str(figur);
         let figur_alive = figur
             .cells
@@ -129,7 +139,7 @@ impl Universe {
             return Err(HandleError::TooBig);
         }
 
-        let cells = (0..wh as u32 * wh as u32).map(|_i| Cell::Dead).collect();
+        let cells = vec![Cell::default(); wh.pow(2).into()];
         let mut univ = Universe {
             cells,
             width: wh,
@@ -229,3 +239,34 @@ impl Shape for Universe {
 //         Ok(())
 //     }
 // }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const WH: u16 = 20;
+
+    fn gen_uni(w: u16, h: u16, cells: &[bool]) -> Universe {
+        let cells = cells.iter().map(|c| (*c).into()).collect::<Vec<Cell>>();
+        Universe {
+            width: w,
+            height: h,
+            cells,
+        }
+    }
+
+    #[test]
+    fn rabbit_hole() {
+        let rabbit = shapes::featherweigth_spaceship();
+        let rabbit_uni = Universe::from_vec_str(&rabbit);
+        let cells = [false, false, true, true, false, true, false, true, true];
+        let uni = gen_uni(3, 3, &cells);
+        assert_eq!(rabbit_uni, uni);
+    }
+    #[test]
+    fn full() {
+        let full = shapes::full(WH);
+        let cells = [true; WH.pow(2) as usize];
+        let uni = gen_uni(WH, WH, &cells);
+        assert_eq!(full, uni);
+    }
+}
