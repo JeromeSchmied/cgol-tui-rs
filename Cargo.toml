@@ -12,4 +12,4 @@ keywords = ["conway", "game-of-life", "tui"]
 [dependencies]
 crossterm = "0.27.0"
 fastrand = "2.0.1"
-ratatui = "0.26.1"
+ratatui = "0.27.0"

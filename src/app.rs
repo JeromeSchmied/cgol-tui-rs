@@ -5,10 +5,10 @@ use std::time::Duration;
 
 pub struct App {
     pub universe: Universe,
-    i: usize,
-    poll_t: Duration,
-    paused: bool,
-    wh: u16,
+    pub i: usize,
+    pub poll_t: Duration,
+    pub paused: bool,
+    pub wh: u16,
 }
 impl Default for App {
     fn default() -> Self {
@@ -35,28 +35,16 @@ impl App {
             paused: false,
         }
     }
-    pub fn paused(&self) -> bool {
-        self.paused
-    }
-    pub fn poll_t(&self) -> Duration {
-        self.poll_t
-    }
-    pub fn i(&self) -> usize {
-        self.i
-    }
     // pub fn render_universe(&self) {
     //     println!("{}", self.universe);
     // }
-    pub fn wh(&self) -> u16 {
-        self.wh
-    }
     pub fn set_wh(&mut self) {
         let wh = size().expect("couldn't get terminal size");
         self.wh = (wh.1 + 10) * 3;
     }
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
-        if self.paused() {
+        if self.paused {
             self.poll_t = *prev_poll_t;
         } else {
             *prev_poll_t = self.poll_t;
@@ -66,7 +54,7 @@ impl App {
     }
     pub fn restart(&mut self) {
         self.universe =
-            shapes::get(self.wh(), self.i).expect("display area is too small to fit current shape");
+            shapes::get(self.wh, self.i).expect("display area is too small to fit current shape");
     }
 
     pub fn tick(&mut self) {
@@ -98,7 +86,7 @@ impl App {
         } else {
             self.i = 0;
         }
-        if let Ok(shape) = shapes::get(self.wh(), self.i) {
+        if let Ok(shape) = shapes::get(self.wh, self.i) {
             self.universe = shape;
         } else {
             eprintln!("couldn't switch to next shape");
@@ -110,7 +98,7 @@ impl App {
         } else {
             self.i = shapes::N as usize - 1;
         }
-        if let Ok(shape) = shapes::get(self.wh(), self.i) {
+        if let Ok(shape) = shapes::get(self.wh, self.i) {
             self.universe = shape;
         } else {
             eprintln!("couldn't switch to previous shape");

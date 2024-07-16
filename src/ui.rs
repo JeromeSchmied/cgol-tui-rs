@@ -1,8 +1,8 @@
 use crate::app::App;
 use ratatui::{
     layout::{Constraint, Direction, Layout},
-    style::{Color, Style},
-    text::{Line, Span},
+    style::Stylize,
+    text::Line,
     widgets::{canvas::Canvas, Block, BorderType, Borders},
     Frame,
 };
@@ -53,25 +53,21 @@ pub fn ui(f: &mut Frame, app: &App) {
         .constraints([Constraint::Percentage(100)])
         .split(chunks[1]);
 
-    let current_keys_hint = Span::styled(
-        "[q]uit, [r]estart, [R]eset, [n]ext, [p]revious, play[ ]pause, 'k': faster, 'j': slower",
-        Style::default().fg(Color::Yellow),
-    );
+    let current_keys_hint =
+        "[q]uit, [r]estart, [R]eset, [n]ext, [p]rev, play[ ]pause, 'k': faster, 'j': slower"
+            .yellow();
 
-    let stat_style = Style::default().fg(Color::LightBlue);
-    let poll_t = Span::styled(
-        format!(
-            "Poll time: {}",
-            if let std::time::Duration::MAX = app.poll_t() {
-                "max".into()
-            } else {
-                format!("{:.0?}", app.poll_t())
-            }
-        ),
-        stat_style,
-    );
+    let poll_t = format!(
+        "Poll time: {}",
+        if let std::time::Duration::MAX = app.poll_t {
+            "max".into()
+        } else {
+            format!("{:.0?}", app.poll_t)
+        }
+    )
+    .light_blue();
 
-    let div = Span::styled(" | ", Style::default().fg(Color::White));
+    let div = " | ".white();
     let current_stats = vec![current_keys_hint, div.clone(), poll_t];
     let footer_data = Line::from(current_stats);
 
