@@ -1,4 +1,4 @@
-use crossterm::event::KeyCode;
+use ratatui::crossterm::event::KeyCode;
 
 pub const PLAY_PAUSE: KeyCode = KeyCode::Char(' ');
 

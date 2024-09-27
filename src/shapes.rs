@@ -16,7 +16,7 @@ pub enum HandleError {
 ///
 /// `from_figur()`
 /// `IndexOutOfRange`
-pub fn get(wh: u16, i: usize) -> Result<Universe, HandleError> {
+pub fn get(wh: (u16, u16), i: usize) -> Result<Universe, HandleError> {
     if i > shapes::N as usize {
         return Err(HandleError::OutOfRange);
     }

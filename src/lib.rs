@@ -1,6 +1,5 @@
-use ratatui::{style::Color, widgets::canvas::Shape};
-
 use crate::shapes::HandleError;
+use ratatui::{style::Color, widgets::canvas::Shape};
 use std::time::Duration;
 
 /// Default poll duration
@@ -34,7 +33,6 @@ impl From<bool> for Cell {
     }
 }
 impl Cell {
-    #[allow(unused)]
     fn toggle(&mut self) {
         *self = match *self {
             Cell::Dead => Cell::Alive,
@@ -74,7 +72,7 @@ impl<U1: Into<usize>, U2: Into<usize>> std::ops::IndexMut<(U1, U2)> for Universe
 }
 
 impl Universe {
-    fn get_idx<U1: Into<usize>, U2: Into<usize>>(&self, row: U1, col: U2) -> usize {
+    fn get_idx(&self, row: impl Into<usize>, col: impl Into<usize>) -> usize {
         let row = row.into();
         let col = col.into();
         // Convert (x;y) to index
@@ -127,7 +125,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    fn from_figur(wh: u16, figur: &[String]) -> Result<Universe, HandleError> {
+    fn from_figur(wh: (u16, u16), figur: &[String]) -> Result<Universe, HandleError> {
         let figur = Universe::from_vec_str(figur);
         let figur_alive = figur
             .cells
@@ -135,18 +133,18 @@ impl Universe {
             .filter(|cell| cell == &&Cell::Alive)
             .count();
 
-        if wh < figur.height() || wh < figur.width() {
+        if wh.0 < figur.width() || wh.1 < figur.height() {
             return Err(HandleError::TooBig);
         }
 
-        let cells = vec![Cell::default(); wh.pow(2).into()];
+        let cells = vec![Cell::default(); (wh.0 * wh.1).into()];
         let mut univ = Universe {
             cells,
-            width: wh,
-            height: wh,
+            width: wh.0,
+            height: wh.1,
         };
 
-        let (start_row, start_col) = ((wh - figur.height()) / 2, (wh - figur.width()) / 2);
+        let (start_row, start_col) = ((wh.1 - figur.height()) / 2, (wh.0 - figur.width()) / 2);
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {

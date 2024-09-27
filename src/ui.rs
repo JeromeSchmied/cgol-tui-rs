@@ -17,7 +17,7 @@ pub fn ui(f: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(0), Constraint::Length(1)])
-        .split(f.size());
+        .split(f.area());
 
     let main_chunks = Layout::default()
         .direction(Direction::Horizontal)

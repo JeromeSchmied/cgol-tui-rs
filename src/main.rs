@@ -1,35 +1,17 @@
 use cgol_tui::{app::App, *};
-use crossterm::{
+use ratatui::crossterm::{
     event::{self, poll, Event, KeyEventKind},
-    execute,
-    terminal::{
-        disable_raw_mode, enable_raw_mode, size, EnterAlternateScreen, LeaveAlternateScreen,
-    },
+    terminal::size,
 };
-use ratatui::{
-    backend::{Backend, CrosstermBackend},
-    Terminal,
-};
-use std::{io, panic};
+use ratatui::{backend::Backend, Terminal};
+use std::io;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Define a custom panic hook to reset the terminal properties.
-    // This way, you won't have your terminal messed up if an unexpected error happens.
-    let panic_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |panic| {
-        disable_raw_mode().expect("couldn't disable raw_mode");
-        execute!(io::stdout(), LeaveAlternateScreen).expect("couldn't leave alternate screen");
-        panic_hook(panic);
-    }));
-
     // init terminal
-    enable_raw_mode()?;
-    execute!(io::stdout(), EnterAlternateScreen)?;
-
-    let backend = CrosstermBackend::new(io::stdout());
-    let mut terminal = Terminal::new(backend)?;
+    let mut terminal = ratatui::try_init()?;
 
     // create app and run it with width and height from terminal size
+    // FIXME: use render_are.area() for size determination
     let wh = size()?;
     let wh = ((wh.1 - 3) * 4).min((wh.0 / 2 - 2) * 2);
     let mut app = App::new(wh);
@@ -37,9 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let res = run_app(&mut terminal, &mut app);
 
     // reset terminal
-    disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    terminal.show_cursor()?;
+    ratatui::try_restore()?;
 
     if let Err(err) = res {
         println!("Error: {err:?}");
@@ -63,30 +43,14 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     return Ok(());
                 }
                 match key.code {
-                    kmaps::QUIT => {
-                        break;
-                    }
-                    kmaps::SLOWER => {
-                        app.slower(false);
-                    }
-                    kmaps::FASTER => {
-                        app.faster(false);
-                    }
-                    kmaps::PLAY_PAUSE => {
-                        app.play_pause(&mut prev_poll_t);
-                    }
-                    kmaps::RESTART => {
-                        app.restart();
-                    }
-                    kmaps::NEXT => {
-                        app.next();
-                    }
-                    kmaps::PREV => {
-                        app.prev();
-                    }
-                    kmaps::RESET => {
-                        *app = app::App::default();
-                    }
+                    kmaps::QUIT => break,
+                    kmaps::SLOWER => app.slower(false),
+                    kmaps::FASTER => app.faster(false),
+                    kmaps::PLAY_PAUSE => app.play_pause(&mut prev_poll_t),
+                    kmaps::RESTART => app.restart(),
+                    kmaps::NEXT => app.next(),
+                    kmaps::PREV => app.prev(),
+                    kmaps::RESET => *app = App::default(),
                     _ => {}
                 }
             } else {

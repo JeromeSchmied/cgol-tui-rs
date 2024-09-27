@@ -1,6 +1,5 @@
-use crossterm::terminal::size;
-
 use crate::{shapes, Universe, DEF_DUR};
+use ratatui::crossterm::terminal;
 use std::time::Duration;
 
 pub struct App {
@@ -8,13 +7,12 @@ pub struct App {
     pub i: usize,
     pub poll_t: Duration,
     pub paused: bool,
-    pub wh: u16,
+    pub wh: (u16, u16),
 }
 impl Default for App {
     fn default() -> Self {
         let i = 0;
-        let wh = size().expect("couldn't get terminal size");
-        let wh = (wh.1 + 10) * 3;
+        let wh = terminal::size().expect("couldn't get terminal size");
         App {
             wh,
             universe: shapes::get(wh, i).unwrap(),
@@ -81,10 +79,10 @@ impl App {
     }
 
     pub fn next(&mut self) {
-        if self.i + 1 != shapes::N as usize {
-            self.i += 1;
-        } else {
+        if self.i + 1 == shapes::N as usize {
             self.i = 0;
+        } else {
+            self.i += 1;
         }
         if let Ok(shape) = shapes::get(self.wh, self.i) {
             self.universe = shape;
