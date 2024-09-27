@@ -31,7 +31,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // create app and run it with width and height from terminal size
     let wh = size()?;
-    let mut app = App::new((wh.1 + 10) * 3);
+    let wh = ((wh.1 - 3) * 4).min((wh.0 / 2 - 2) * 2);
+    let mut app = App::new(wh);
 
     let res = run_app(&mut terminal, &mut app);
 
