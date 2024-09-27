@@ -16,32 +16,40 @@ pub enum HandleError {
 ///
 /// `from_figur()`
 /// `IndexOutOfRange`
-pub fn get(wh: (u16, u16), i: usize) -> Result<Universe, HandleError> {
+pub fn get(area: Area, i: usize) -> Result<Universe, HandleError> {
     if i > shapes::N as usize {
         return Err(HandleError::OutOfRange);
     }
 
     match i {
-        0 => Universe::from_figur(wh, &shapes::featherweigth_spaceship()),
+        0 => Universe::from_figur(area, &shapes::featherweigth_spaceship()),
 
-        1 => Universe::from_figur(wh, &shapes::copperhead()),
+        1 => Universe::from_figur(area, &shapes::copperhead()),
 
-        2 => Universe::from_figur(wh, &shapes::gosper_glider_gun()),
+        2 => Universe::from_figur(area, &shapes::gosper_glider_gun()),
 
-        3 => Ok(shapes::stripes(wh)),
+        3 => Ok(shapes::stripes(area)),
 
-        4 => Ok(shapes::rand(wh)),
+        4 => Ok(shapes::rand(area)),
 
-        5 => Universe::from_figur(wh, &shapes::rabbits()),
+        5 => Universe::from_figur(area, &shapes::rabbits()),
 
-        6 => Universe::from_figur(wh, &shapes::bonk_tie()),
+        6 => Universe::from_figur(area, &shapes::bonk_tie()),
 
-        7 => Universe::from_figur(wh, &shapes::acorn()),
+        7 => Universe::from_figur(area, &shapes::acorn()),
 
-        8 => Ok(shapes::full(wh)),
+        8 => Ok(shapes::full(area)),
 
         _ => Err(HandleError::OutOfRange),
     }
+}
+#[test]
+fn get_test() {
+    let area = Area::new(40u8, 40u8);
+    for i in 0..N {
+        assert!(get(area, i.into()).is_ok());
+    }
+    assert!(get(area, N.into()).is_err());
 }
 
 pub fn copperhead() -> Vec<String> {
@@ -109,6 +117,21 @@ pub fn gosper_glider_gun() -> Vec<String> {
 pub fn featherweigth_spaceship() -> Vec<String> {
     ["__#".into(), "#_#".into(), "_##".into()].to_vec()
 }
+#[test]
+fn featherweight_spaceship_test() {
+    let area = Area::new(3u8, 3u8);
+    let m = Universe::from_vec_str(&featherweigth_spaceship());
+    assert_eq!(m.area, area);
+    dbg!(&m);
+    let alive = [(0u8, 2u8), (1u8, 0u8), (1u8, 2u8), (2u8, 1u8), (2u8, 2u8)];
+    for alive_cell in alive {
+        dbg!(alive_cell);
+        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+    }
+    assert!(m.get((3u8, 3u8)).is_none());
+    assert!(m.get((3u8, 4u8)).is_none());
+    assert!(m.get((4u8, 3u8)).is_none());
+}
 
 /// 8x4
 pub fn rabbits() -> Vec<String> {
@@ -119,6 +142,30 @@ pub fn rabbits() -> Vec<String> {
         "_#_#____".into(),
     ]
     .to_vec()
+}
+#[test]
+fn rabbits_test() {
+    let area = Area::new(8u8, 4u8);
+    let m = Universe::from_vec_str(&rabbits());
+    assert_eq!(m.area, area);
+    dbg!(&m);
+    let alive = [
+        (0u8, 0u8),
+        (0u8, 6u8),
+        (1u8, 2u8),
+        (1u8, 6u8),
+        (2u8, 2u8),
+        (2u8, 5u8),
+        (2u8, 7u8),
+        (3u8, 1u8),
+        (3u8, 3u8),
+    ];
+    for alive_cell in alive {
+        dbg!(alive_cell);
+        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+    }
+    assert!(m.get((4u8, 8u8)).is_none());
+    assert!(m.get((8u8, 4u8)).is_none());
 }
 
 /// 3×5
@@ -132,33 +179,65 @@ pub fn bonk_tie() -> Vec<String> {
     ]
     .to_vec()
 }
+#[test]
+fn bonk_tie_test() {
+    let area = Area::new(3u8, 5u8);
+    let m = Universe::from_vec_str(&bonk_tie());
+    assert_eq!(m.area, area);
+    dbg!(&m);
+    let alive = [
+        (0u8, 0u8),
+        (0u8, 1u8),
+        (1u8, 0u8),
+        (1u8, 1u8),
+        (2u8, 2u8),
+        (3u8, 2u8),
+        (4u8, 2u8),
+    ];
+    for alive_cell in alive {
+        dbg!(alive_cell);
+        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+    }
+    assert!(m.get((4u8, 3u8)).is_none());
+    assert!(m.get((3u8, 4u8)).is_none());
+}
 
 /// 7×3
 pub fn acorn() -> Vec<String> {
     ["_#_____".into(), "___#___".into(), "##__###".into()].to_vec()
 }
-
-/// `wh`x`wh`
-pub fn rand(wh: u16) -> Universe {
-    let cells = (0..wh * wh)
-        .map(|_i| {
-            if fastrand::bool() {
-                Cell::Alive
-            } else {
-                Cell::Dead
-            }
-        })
-        .collect();
-    Universe {
-        width: wh,
-        height: wh,
-        cells,
+#[test]
+fn acorn_test() {
+    let area = Area::new(7u8, 3u8);
+    let m = Universe::from_vec_str(&acorn());
+    assert_eq!(m.area, area);
+    dbg!(&m);
+    let alive = [
+        (0u8, 1u8),
+        (1u8, 3u8),
+        (2u8, 0u8),
+        (2u8, 1u8),
+        (2u8, 4u8),
+        (2u8, 5u8),
+        (2u8, 6u8),
+    ];
+    for alive_cell in alive {
+        dbg!(alive_cell);
+        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
     }
+    assert!(m.get((4u8, 3u8)).is_none());
+    assert!(m.get((3u8, 4u8)).is_none());
 }
 
-/// `wh`x`wh`
-pub fn stripes(wh: u16) -> Universe {
-    let cells = (0..wh * wh)
+/// `area.len()`
+pub fn rand(area: Area) -> Universe {
+    let cells = (0..area.len()).map(|_i| fastrand::bool().into()).collect();
+    Universe { area, cells }
+}
+
+/// `area.len()`
+pub fn stripes(area: Area) -> Universe {
+    let cells = (0..area.len())
         .map(|i| {
             if i % 2 == 0 || i % 7 == 0 {
                 Cell::Alive
@@ -167,21 +246,41 @@ pub fn stripes(wh: u16) -> Universe {
             }
         })
         .collect();
-    Universe {
-        width: wh,
-        height: wh,
-        cells,
-    }
+    Universe { area, cells }
+}
+#[test]
+fn stripes_test() {
+    let area = Area::new(0u8, 0u8);
+    let m = stripes(area);
+    assert!(m.cells.is_empty());
+    assert_eq!(m.area, area);
+    dbg!(&m);
+    assert!(m.get((4u8, 3u8)).is_none());
+    assert!(m.get((3u8, 4u8)).is_none());
+    assert!(m.get((0u8, 1u8)).is_none());
+    assert!(m.get((1u8, 0u8)).is_none());
 }
 
-/// `wh`x`wh`
-pub fn full(wh: u16) -> Universe {
-    let cells = vec![Cell::Alive; wh as usize * wh as usize];
-    Universe {
-        width: wh,
-        height: wh,
-        cells,
+/// `area.len()`
+pub fn full(area: Area) -> Universe {
+    let cells = vec![Cell::Alive; area.len()];
+    Universe { area, cells }
+}
+#[test]
+fn full_test() {
+    let area = Area::new(4u8, 3u8);
+    let m = full(area);
+    assert_eq!(m.area, area);
+    assert!(m.cells.iter().all(|j| *j == Cell::Alive));
+    dbg!(&m);
+    for i in 0..m.height() - 1 {
+        for j in 0..m.width() - 1 {
+            dbg!((i, j));
+            assert_eq!(m.get((i, j)), Some(&Cell::Alive));
+        }
     }
+    assert!(m.get((4u8, 3u8)).is_none());
+    assert!(m.get((3u8, 4u8)).is_none());
 }
 
 pub fn two_engine_cordership() -> String {
