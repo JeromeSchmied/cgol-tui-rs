@@ -144,8 +144,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(area: Area, figur: &[String]) -> Result<Universe, HandleError> {
-        let figur = Universe::from_vec_str(figur);
+    pub fn from_figur(area: Area, figur: Universe) -> Result<Universe, HandleError> {
         let figur_alive = figur
             .cells
             .iter()
