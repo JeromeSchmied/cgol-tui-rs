@@ -1,8 +1,12 @@
-# Conway's Game of Life cli in Rust
+# Conway's Game of Life tui in Rust
 
 ## Usage
 
-clone the repo and run `cargo r`
+either
+
+-   `cargo install cgol-tui`
+-   `cargo install --locked --git "https://github.com/JeromeSchmied/cgol-tui-rs"`
+-   clone the repo and run `cargo r`
 
 ## Sample
 
@@ -15,14 +19,14 @@ clone the repo and run `cargo r`
 -   [x] error handling
 -   [x] publishing to crates.io
 -   [x] changing to `Canvas` for rendering viewer block
-
-## Warning!
-
-If your terminal is messed up by accident fix: on Mac, Linux: `reset`, on Windows: exit the app.
+-   [ ] the ability to parse `.cells` files, from [conwaylife.com](https://conwaylife.com/patterns)
 
 ## Acknowledgements
 
-The core of this app is adapted from the great [Rust-Wasm tutorial](https://rustwasm.github.io/docs/book/).
+-   The core of this app is adapted from the [Rust-Wasm tutorial](https://rustwasm.github.io/docs/book/).
+-   main dependencies:
+    -   ratatui: ui
+    -   crossterm: ratatui backend
 
 ## License
 
@@ -40,4 +44,4 @@ submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
 conditions.
 
-[1]: assets/0.3.0_stripes.png "Image of using cgol-cli-rs in Alacritty on Arch Linux"
+[1]: assets/0.4.0.png "Image of using cgol-tui in Alacritty on Arch Linux btw"

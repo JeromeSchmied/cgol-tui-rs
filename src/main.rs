@@ -1,103 +1,32 @@
-use cgol_tui::{app::App, *};
-use crossterm::{
-    event::{self, poll, Event, KeyEventKind},
-    execute,
-    terminal::{
-        disable_raw_mode, enable_raw_mode, size, EnterAlternateScreen, LeaveAlternateScreen,
-    },
-};
-use ratatui::{
-    backend::{Backend, CrosstermBackend},
-    Terminal,
-};
-use std::{io, panic};
+use app::App;
+
+pub mod app;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Define a custom panic hook to reset the terminal properties.
-    // This way, you won't have your terminal messed up if an unexpected error happens.
-    let panic_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |panic| {
-        disable_raw_mode().expect("couldn't disable raw_mode");
-        execute!(io::stdout(), LeaveAlternateScreen).expect("couldn't leave alternate screen");
-        panic_hook(panic);
-    }));
+    // set up logger
+    fern::Dispatch::new()
+        // Add blanket level filter
+        // TODO: cli -v^n, 0 < n < 5
+        .level(log::LevelFilter::Debug)
+        // Output to stdout, files, and other Dispatch configurations
+        .chain(
+            std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(".cgoltui.log")?,
+        )
+        // Apply globally
+        .apply()?;
 
-    // init terminal
-    enable_raw_mode()?;
-    execute!(io::stdout(), EnterAlternateScreen)?;
+    let mut terminal = ratatui::try_init()?;
 
-    let backend = CrosstermBackend::new(io::stdout());
-    let mut terminal = Terminal::new(backend)?;
+    let mut app = App::default();
+    let res = app.run(&mut terminal);
 
-    // create app and run it with width and height from terminal size
-    let wh = size()?;
-    let mut app = App::new((wh.1 + 10) * 3);
+    ratatui::try_restore()?;
 
-    let res = run_app(&mut terminal, &mut app);
-
-    // reset terminal
-    disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    terminal.show_cursor()?;
-
-    if let Err(err) = res {
-        println!("Error: {err:?}");
-    }
-
-    Ok(())
-}
-
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<()> {
-    let mut prev_poll_t = app.poll_t;
-
-    loop {
-        app.set_wh();
-
-        terminal.draw(|f| ui::ui(f, app))?;
-
-        // Wait up to `poll_t` for another event
-        if poll(app.poll_t)? {
-            if let Event::Key(key) = event::read()? {
-                if key.kind != KeyEventKind::Press {
-                    return Ok(());
-                }
-                match key.code {
-                    kmaps::QUIT => {
-                        break;
-                    }
-                    kmaps::SLOWER => {
-                        app.slower(false);
-                    }
-                    kmaps::FASTER => {
-                        app.faster(false);
-                    }
-                    kmaps::PLAY_PAUSE => {
-                        app.play_pause(&mut prev_poll_t);
-                    }
-                    kmaps::RESTART => {
-                        app.restart();
-                    }
-                    kmaps::NEXT => {
-                        app.next();
-                    }
-                    kmaps::PREV => {
-                        app.prev();
-                    }
-                    kmaps::RESET => {
-                        *app = app::App::default();
-                    }
-                    _ => {}
-                }
-            } else {
-                // resize and restart
-                app.set_wh();
-                app.restart();
-            }
-        } else {
-            // Timeout expired, updating life state
-            app.tick();
-        }
-    }
+    // if any error has occured while executing, print it in cooked mode
+    res.inspect_err(|e| println!("error: {e:?}"))?;
 
     Ok(())
 }
