@@ -4,8 +4,7 @@ use universe::Universe;
 
 use super::*;
 
-/// Number of currently supported shapes
-pub const N: u8 = 10;
+pub const N: usize = 4;
 
 #[derive(Debug)]
 pub enum HandleError {
@@ -14,38 +13,25 @@ pub enum HandleError {
     Other,
 }
 
-/// Returns universe created from `i`. shape if exists
-///
-/// # Errors
-///
-/// `from_figur()`
-/// `IndexOutOfRange`
-pub fn get(area: Area, i: usize) -> Result<Universe, HandleError> {
-    if i > shapes::N as usize {
-        return Err(HandleError::OutOfRange);
-    }
-
-    match i {
-        0 => Universe::from_figur(area, &shapes::featherweigth_spaceship()),
-        1 => Universe::from_figur(area, &shapes::copperhead()),
-        2 => Universe::from_figur(area, &shapes::gosper_glider_gun()),
-        3 => Ok(shapes::stripes(area)),
-        4 => Ok(shapes::rand(area)),
-        5 => Universe::from_figur(area, &shapes::rabbits()),
-        6 => Universe::from_figur(area, &shapes::bonk_tie()),
-        7 => Universe::from_figur(area, &shapes::acorn()),
-        8 => Ok(shapes::full(area)),
-        9 => Ok(shapes::frame(area)),
-        _ => Err(HandleError::OutOfRange),
-    }
+pub fn all() -> Vec<Universe> {
+    vec![
+        Universe::from_str(FEATHERWEIGTH_SPACESHIP),
+        Universe::from_str(GOSPER_GLIDER_GUN),
+        Universe::from_str(COPPERHEAD),
+        Universe::from_str(RABBITS),
+        Universe::from_str(BONK_TIE),
+        Universe::from_str(ACORN),
+    ]
 }
-#[test]
-fn get_test() {
-    let area = Area::new(40, 40);
-    for i in 0..N {
-        assert!(get(area, i.into()).is_ok());
+
+pub fn get_special(i: usize, area: Area) -> Universe {
+    match i {
+        0 => full(area),
+        1 => frame(area),
+        2 => rand(area),
+        3 => stripes(area),
+        i => unreachable!("index out of bounds: len is {N} but index is {i}"),
     }
-    assert!(get(area, N.into()).is_err());
 }
 
 // height: 5
@@ -136,75 +122,42 @@ fn frame_test3() {
     assert_eq!(univ, frame);
 }
 
-pub fn copperhead() -> Vec<String> {
-    // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
-    [
-        "_____#_##___".into(),
-        "____#______#".into(),
-        "___##___#__#".into(),
-        "##_#_____##_".into(),
-        "##_#_____##_".into(),
-        "___##___#__#".into(),
-        "____#______#".into(),
-        "_____#_##___".into(),
-    ]
-    .to_vec()
-}
+pub const COPPERHEAD: &str = "\
+_____#_##___
+____#______#
+___##___#__#
+##_#_____##_
+##_#_____##_
+___##___#__#
+____#______#
+_____#_##___";
 
-pub fn gosper_glider_gun() -> Vec<String> {
-    [
-        ["_".repeat(24), "#".into(), "_".repeat(11)].concat(),
-        ["_".repeat(22), "#_#".into(), "_".repeat(11)].concat(),
-        [
-            "_".repeat(12),
-            "##______##".into(),
-            "_".repeat(12),
-            "##".into(),
-        ]
-        .concat(),
-        [
-            "_".repeat(11),
-            "#___#____##".into(),
-            "_".repeat(12),
-            "##".into(),
-        ]
-        .concat(),
-        [
-            "##".into(),
-            "_".repeat(8),
-            "#_____#___##".into(),
-            "_".repeat(14),
-        ]
-        .concat(),
-        [
-            "##".into(),
-            "_".repeat(8),
-            "#___#_##____#_#".into(),
-            "_".repeat(11),
-        ]
-        .concat(),
-        [
-            "_".repeat(10),
-            "#_____#".into(),
-            "_".repeat(7),
-            "#".into(),
-            "_".repeat(11),
-        ]
-        .concat(),
-        ["_".repeat(11), "#___#".into(), "_".repeat(20)].concat(),
-        ["_".repeat(12), "##".into(), "_".repeat(22)].concat(),
-    ]
-    .to_vec()
-}
+pub const GOSPER_GLIDER_GUN: &str = "\
+!Name: Gosper glider gun
+!Author: Bill Gosper
+!The first known gun and the first known finite pattern with unbounded growth.
+!www.conwaylife.com/wiki/index.php?title=Gosper_glider_gun
+........................O
+......................O.O
+............OO......OO............OO
+...........O...O....OO............OO
+OO........O.....O...OO
+OO........O...O.OO....O.O
+..........O.....O.......O
+...........O...O
+............OO
+";
 
 /// 3x3
-pub fn featherweigth_spaceship() -> Vec<String> {
-    ["__#".into(), "#_#".into(), "_##".into()].to_vec()
-}
+pub const FEATHERWEIGTH_SPACESHIP: &str = "\
+__#
+ #_#
+ _##";
+
 #[test]
 fn featherweight_spaceship_test() {
     let area = Area::new(3, 3);
-    let m = Universe::from_vec_str(&featherweigth_spaceship());
+    let m = Universe::from_str(FEATHERWEIGTH_SPACESHIP);
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [(0u8, 2u8), (1u8, 0u8), (1u8, 2u8), (2u8, 1u8), (2u8, 2u8)];
@@ -218,19 +171,16 @@ fn featherweight_spaceship_test() {
 }
 
 /// 8x4
-pub fn rabbits() -> Vec<String> {
-    [
-        "#_____#_".into(),
-        "__#___#_".into(),
-        "__#__#_#".into(),
-        "_#_#____".into(),
-    ]
-    .to_vec()
-}
+pub const RABBITS: &str = "\
+#_____#_
+__#___#_
+__#__#_#
+_#_#____";
+
 #[test]
 fn rabbits_test() {
     let area = Area::new(8, 4);
-    let m = Universe::from_vec_str(&rabbits());
+    let m = Universe::from_str(RABBITS);
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [
@@ -253,20 +203,16 @@ fn rabbits_test() {
 }
 
 /// 3×5
-pub fn bonk_tie() -> Vec<String> {
-    [
-        "##_".into(),
-        "##_".into(),
-        "__#".into(),
-        "__#".into(),
-        "__#".into(),
-    ]
-    .to_vec()
-}
+pub const BONK_TIE: &str = "\
+##_
+##_
+__#
+__#
+__#";
 #[test]
 fn bonk_tie_test() {
     let area = Area::new(3, 5);
-    let m = Universe::from_vec_str(&bonk_tie());
+    let m = Universe::from_str(BONK_TIE);
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [
@@ -287,13 +233,15 @@ fn bonk_tie_test() {
 }
 
 /// 7×3
-pub fn acorn() -> Vec<String> {
-    ["_#_____".into(), "___#___".into(), "##__###".into()].to_vec()
-}
+pub const ACORN: &str = "\
+_#_____
+___#___
+##__###";
+
 #[test]
 fn acorn_test() {
     let area = Area::new(7, 3);
-    let m = Universe::from_vec_str(&acorn());
+    let m = Universe::from_str(ACORN);
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [
