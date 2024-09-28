@@ -129,8 +129,9 @@ impl Universe {
         univ
     }
 
-    pub fn from_str(s: &str) -> Self {
+    pub fn from_str(s: impl AsRef<str>) -> Self {
         let v = s
+            .as_ref()
             .trim()
             .lines()
             .map(str::trim)
