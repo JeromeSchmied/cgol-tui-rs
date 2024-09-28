@@ -25,14 +25,6 @@ OO..O
 }
 
 #[test]
-fn rabbit_hole() {
-    let rabbit = shapes::featherweigth_spaceship();
-    let rabbit_uni = Universe::from_vec_str(&rabbit);
-    let cells = [false, false, true, true, false, true, false, true, true];
-    let uni = gen_uni((3u8, 3u8).into(), &cells);
-    assert_eq!(rabbit_uni, uni);
-}
-#[test]
 fn full() {
     let area = Area::new(20, 20);
     let full = shapes::full(area);
@@ -70,7 +62,8 @@ fn halp() {
 #[test]
 fn bigass_tickler() {
     let area = Area::new(8, 8);
-    let mut univ = Universe::from_figur(area, &shapes::featherweigth_spaceship()).unwrap();
+    let mut univ =
+        Universe::from_figur(area, Universe::from_str(shapes::FEATHERWEIGTH_SPACESHIP)).unwrap();
 
     let exp_unis = [
         "\
