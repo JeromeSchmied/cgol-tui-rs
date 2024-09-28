@@ -45,6 +45,12 @@ impl Default for App {
     }
 }
 impl App {
+    pub fn with_universes(self, universes: Vec<Universe>) -> Self {
+        Self {
+            available_universes: [universes, shapes::all()].concat(),
+            ..self
+        }
+    }
     pub fn new(area: Area, available_universes: Vec<Universe>, poll_t: Duration) -> Self {
         App {
             area,
