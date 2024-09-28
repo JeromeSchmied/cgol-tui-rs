@@ -30,11 +30,10 @@ pub fn ui(f: &mut Frame, app: &mut App) {
         .border_type(BorderType::Rounded)
         .title("Conway's Game of Life");
     // 2 blocks less: border
-    let new_area: crate::Area = (
-        chunks[0].width * BRAILLE.width - 2 * BRAILLE.width,
-        chunks[0].height * BRAILLE.height - 2 * BRAILLE.height,
-    )
-        .into();
+    let new_area = Area::new(
+        (chunks[0].width - 2) * BRAILLE.width,
+        (chunks[0].height - 2) * BRAILLE.height,
+    );
     // apply the area change
     if app.area != new_area {
         app.area = new_area;

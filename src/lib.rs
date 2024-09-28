@@ -208,8 +208,13 @@ impl Universe {
         };
         Universe { area, cells }
     }
+
     fn from_str(s: &str) -> Self {
-        let v = s.trim().lines().map(|l| l.into()).collect::<Vec<String>>();
+        let v = s
+            .trim()
+            .lines()
+            .map(std::convert::Into::into)
+            .collect::<Vec<String>>();
         Self::from_vec_str(&v)
     }
 
@@ -231,7 +236,7 @@ impl Universe {
         }
 
         let cells = vec![Cell::default(); area.len()];
-        let mut univ = Universe { cells, area };
+        let mut univ = Universe { area, cells };
 
         let (start_row, start_col) = (
             (area.height - figur.height()) / 2,

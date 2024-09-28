@@ -15,14 +15,14 @@ clone the repo and run `cargo r`
 -   [x] error handling
 -   [x] publishing to crates.io
 -   [x] changing to `Canvas` for rendering viewer block
-
-## Warning!
-
-If your terminal is messed up by accident fix: on Mac, Linux: `reset`, on Windows: exit the app.
+-   [ ] *maybe* the ability to parse `.cells` files
 
 ## Acknowledgements
 
-The core of this app is adapted from the great [Rust-Wasm tutorial](https://rustwasm.github.io/docs/book/).
+-   The core of this app is adapted from the [Rust-Wasm tutorial](https://rustwasm.github.io/docs/book/).
+-   main dependencies:
+    -   ratatui: ui
+    -   crossterm: ratatui backend
 
 ## License
 
