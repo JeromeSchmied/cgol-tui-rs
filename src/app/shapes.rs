@@ -1,3 +1,7 @@
+use area::Area;
+use cell::Cell;
+use universe::Universe;
+
 use super::*;
 
 /// Number of currently supported shapes
@@ -37,7 +41,7 @@ pub fn get(area: Area, i: usize) -> Result<Universe, HandleError> {
 }
 #[test]
 fn get_test() {
-    let area = Area::new(40u8, 40u8);
+    let area = Area::new(40, 40);
     for i in 0..N {
         assert!(get(area, i.into()).is_ok());
     }
@@ -54,8 +58,7 @@ fn get_test() {
 // 4.....4
 //  01234
 pub fn frame(area: Area) -> Universe {
-    let cells = vec![Cell::Dead; area.len()];
-    let mut univ = Universe { area, cells };
+    let mut univ = empty(area);
     if area.height < 3 || area.width < 3 {
         return univ;
     }
@@ -76,7 +79,7 @@ pub fn frame(area: Area) -> Universe {
 }
 #[test]
 fn frame_test00() {
-    let area = Area::new(3u8, 2u8);
+    let area = Area::new(3, 2);
     let univ = Universe::from_vec_str(&["___".to_owned(), "___".to_owned()]);
     let frame = frame(area);
     print!("{frame}");
@@ -84,7 +87,7 @@ fn frame_test00() {
 }
 #[test]
 fn frame_test0() {
-    let area = Area::new(3u8, 3u8);
+    let area = Area::new(3, 3);
     let univ = Universe::from_vec_str(&["___".to_owned(), "_#_".to_owned(), "___".to_owned()]);
     let frame = frame(area);
     print!("{frame}");
@@ -92,7 +95,7 @@ fn frame_test0() {
 }
 #[test]
 fn frame_test1() {
-    let area = Area::new(4u8, 4u8);
+    let area = Area::new(4, 4);
     let univ = Universe::from_vec_str(&[
         "____".to_owned(),
         "_##_".to_owned(),
@@ -105,7 +108,7 @@ fn frame_test1() {
 }
 #[test]
 fn frame_test2() {
-    let area = Area::new(5u8, 5u8);
+    let area = Area::new(5, 5);
     let univ = Universe::from_vec_str(&[
         "_____".to_owned(),
         "_###_".to_owned(),
@@ -119,7 +122,7 @@ fn frame_test2() {
 }
 #[test]
 fn frame_test3() {
-    let area = Area::new(6u8, 6u8);
+    let area = Area::new(6, 6);
     let univ = Universe::from_vec_str(&[
         "______".to_owned(),
         "_####_".to_owned(),
@@ -200,7 +203,7 @@ pub fn featherweigth_spaceship() -> Vec<String> {
 }
 #[test]
 fn featherweight_spaceship_test() {
-    let area = Area::new(3u8, 3u8);
+    let area = Area::new(3, 3);
     let m = Universe::from_vec_str(&featherweigth_spaceship());
     assert_eq!(m.area, area);
     dbg!(&m);
@@ -226,7 +229,7 @@ pub fn rabbits() -> Vec<String> {
 }
 #[test]
 fn rabbits_test() {
-    let area = Area::new(8u8, 4u8);
+    let area = Area::new(8, 4);
     let m = Universe::from_vec_str(&rabbits());
     assert_eq!(m.area, area);
     dbg!(&m);
@@ -262,7 +265,7 @@ pub fn bonk_tie() -> Vec<String> {
 }
 #[test]
 fn bonk_tie_test() {
-    let area = Area::new(3u8, 5u8);
+    let area = Area::new(3, 5);
     let m = Universe::from_vec_str(&bonk_tie());
     assert_eq!(m.area, area);
     dbg!(&m);
@@ -289,7 +292,7 @@ pub fn acorn() -> Vec<String> {
 }
 #[test]
 fn acorn_test() {
-    let area = Area::new(7u8, 3u8);
+    let area = Area::new(7, 3);
     let m = Universe::from_vec_str(&acorn());
     assert_eq!(m.area, area);
     dbg!(&m);
@@ -331,7 +334,7 @@ pub fn stripes(area: Area) -> Universe {
 }
 #[test]
 fn stripes_test() {
-    let area = Area::new(0u8, 0u8);
+    let area = Area::new(0, 0);
     let m = stripes(area);
     assert!(m.cells.is_empty());
     assert_eq!(m.area, area);
@@ -342,6 +345,11 @@ fn stripes_test() {
     assert!(m.get((1u8, 0u8)).is_none());
 }
 
+pub fn empty(area: Area) -> Universe {
+    let cells = vec![Cell::Dead; area.len()];
+    Universe::new(area, cells)
+}
+
 /// `area.len()`
 pub fn full(area: Area) -> Universe {
     let cells = vec![Cell::Alive; area.len()];
@@ -349,7 +357,7 @@ pub fn full(area: Area) -> Universe {
 }
 #[test]
 fn full_test() {
-    let area = Area::new(4u8, 3u8);
+    let area = Area::new(4, 3);
     let m = full(area);
     assert_eq!(m.area, area);
     assert!(m.cells.iter().all(|j| *j == Cell::Alive));
@@ -362,23 +370,4 @@ fn full_test() {
     }
     assert!(m.get((4u8, 3u8)).is_none());
     assert!(m.get((3u8, 4u8)).is_none());
-}
-
-pub fn two_engine_cordership() -> String {
-    todo!();
-    // [
-    //     "_".repeat(19),
-    //     "##".into(),
-    //     "_".repeat(19),
-    //     "\n".into(),
-    //     "_".repeat(19),
-    //     "####".into(),
-    //     "_".repeat(17),
-    //     "\n".into(),
-    // ]
-    // .concat()
-}
-
-pub fn snark_loop() -> String {
-    todo!()
 }

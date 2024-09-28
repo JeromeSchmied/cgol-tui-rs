@@ -6,16 +6,35 @@ fn gen_uni(area: Area, cells: &[bool]) -> Universe {
 }
 
 #[test]
+fn parse0() {
+    let figur = "\
+..O
+OO..O
+
+...O
+..O";
+    let univ = Universe::from_str(figur);
+    let cells = [
+        /* 1st row */ false, false, true, false, false, /* 2nd row */ true, true, false,
+        false, true, /* 3rd row */ false, false, false, false, false,
+        /* 4th row */ false, false, false, true, false, /* 5th row */ false, false, true,
+        false, false,
+    ];
+    let area = Area::new(5, 5);
+    assert_eq!(gen_uni(area, &cells), univ);
+}
+
+#[test]
 fn rabbit_hole() {
     let rabbit = shapes::featherweigth_spaceship();
     let rabbit_uni = Universe::from_vec_str(&rabbit);
     let cells = [false, false, true, true, false, true, false, true, true];
-    let uni = gen_uni((3u16, 3u16).into(), &cells);
+    let uni = gen_uni((3u8, 3u8).into(), &cells);
     assert_eq!(rabbit_uni, uni);
 }
 #[test]
 fn full() {
-    let area = Area::new(20u16, 20u16);
+    let area = Area::new(20, 20);
     let full = shapes::full(area);
     let cells = vec![true; area.len()];
     let uni = gen_uni(area, &cells);
@@ -23,7 +42,7 @@ fn full() {
 }
 #[test]
 fn halp() {
-    let area = Area::new(2u8, 2u8);
+    let area = Area::new(2, 2);
     let cells = vec![false, true, true, false];
     let univ = gen_uni(area, &cells);
 
@@ -50,7 +69,7 @@ fn halp() {
 
 #[test]
 fn bigass_tickler() {
-    let area = Area::new(8u8, 8u8);
+    let area = Area::new(8, 8);
     let mut univ = Universe::from_figur(area, &shapes::featherweigth_spaceship()).unwrap();
 
     let exp_unis = [

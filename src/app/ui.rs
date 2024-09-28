@@ -1,4 +1,4 @@
-use crate::{app::App, Area};
+use crate::{app::App, app::Area};
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::Stylize,

@@ -1,5 +1,66 @@
-use crate::{shapes, Area, Universe, DEF_DUR};
+pub use area::Area;
+pub use cell::Cell;
+use ratatui::crossterm::event::{self, poll, Event, KeyEventKind};
+use ratatui::{backend::Backend, Terminal};
+pub use shapes::HandleError;
+use std::io;
 use std::time::Duration;
+pub use universe::Universe;
+
+/// Default poll duration
+pub const DEF_DUR: Duration = Duration::from_millis(400);
+
+mod area;
+mod cell;
+/// Keymaps to handle input events
+mod kmaps;
+/// Starting shapes
+mod shapes;
+/// ui
+mod ui;
+/// Conway's Game of Life universe
+mod universe;
+
+#[cfg(test)]
+mod tests;
+
+impl App {
+    pub fn run<B: Backend>(&mut self, terminal: &mut Terminal<B>) -> io::Result<()> {
+        let mut prev_poll_t = self.poll_t;
+
+        loop {
+            terminal.draw(|f| ui::ui(f, self))?;
+
+            // Wait up to `poll_t` for another event
+            if poll(self.poll_t)? {
+                if let Event::Key(key) = event::read()? {
+                    if key.kind != KeyEventKind::Press {
+                        continue;
+                    }
+                    match key.code {
+                        kmaps::QUIT => break,
+                        kmaps::SLOWER => self.slower(false),
+                        kmaps::FASTER => self.faster(false),
+                        kmaps::PLAY_PAUSE => self.play_pause(&mut prev_poll_t),
+                        kmaps::RESTART => self.restart(),
+                        kmaps::NEXT => self.next(),
+                        kmaps::PREV => self.prev(),
+                        kmaps::RESET => *self = Self::default(),
+                        _ => {}
+                    }
+                } else {
+                    // resize and restart
+                    self.restart();
+                }
+            } else {
+                // Timeout expired, updating life state
+                self.tick();
+            }
+        }
+
+        Ok(())
+    }
+}
 
 pub struct App {
     pub universe: Universe,
@@ -20,13 +81,12 @@ impl Default for App {
     }
 }
 impl App {
-    pub fn new(area: Area) -> Self {
-        let i = 0;
+    pub fn new(area: Area, universe: Universe, poll_t: Duration) -> Self {
         App {
             area,
-            universe: shapes::get(area, i).unwrap(),
-            i,
-            poll_t: DEF_DUR,
+            universe,
+            i: 0,
+            poll_t,
             paused: false,
         }
     }
@@ -81,7 +141,12 @@ impl App {
         if let Ok(shape) = shapes::get(self.area, self.i) {
             self.universe = shape;
         } else {
-            eprintln!("couldn't switch to next shape");
+            log::error!(
+                "couldn't switch to next shape: number of shapes: {}, idx: {}, universe: {:?}",
+                shapes::N,
+                self.i,
+                self.universe
+            );
         }
     }
     pub fn prev(&mut self) {
@@ -93,7 +158,12 @@ impl App {
         if let Ok(shape) = shapes::get(self.area, self.i) {
             self.universe = shape;
         } else {
-            eprintln!("couldn't switch to previous shape");
+            log::error!(
+                "couldn't switch to previous shape: number of shapes: {}, idx: {}, universe: {:?}",
+                shapes::N,
+                self.i,
+                self.universe
+            );
         }
     }
 }
