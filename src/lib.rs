@@ -4,8 +4,6 @@ use std::time::Duration;
 
 /// Default poll duration
 pub const DEF_DUR: Duration = Duration::from_millis(400);
-/// Default Width and Height
-// pub const DEF_WH: u16 = 32;
 
 /// App
 pub mod app;
@@ -15,6 +13,48 @@ pub mod kmaps;
 pub mod shapes;
 /// ui
 pub mod ui;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
+pub struct Area {
+    pub width: u16,
+    pub height: u16,
+}
+impl Area {
+    pub fn new(width: impl Into<u16>, height: impl Into<u16>) -> Self {
+        Area {
+            width: width.into(),
+            height: height.into(),
+        }
+    }
+    pub fn with_width(self, width: impl Into<u16>) -> Self {
+        Self::new(width, self.height)
+    }
+    pub fn with_height(self, height: impl Into<u16>) -> Self {
+        Self::new(self.width, height)
+    }
+    pub fn add_to_width(self, width: impl Into<i32>) -> Self {
+        self.with_width((self.width as i32 + width.into()) as u16)
+    }
+    pub fn add_to_height(self, height: impl Into<i32>) -> Self {
+        self.with_height((self.height as i32 + height.into()) as u16)
+    }
+    pub const fn len(&self) -> usize {
+        self.width as usize * self.height as usize
+    }
+
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+impl<U1: Into<u16>, U2: Into<u16>> From<(U1, U2)> for Area {
+    fn from(val: (U1, U2)) -> Self {
+        Self {
+            width: val.0.into(),
+            height: val.1.into(),
+        }
+    }
+}
 
 /// information about one `Cell`: either `Dead` or `Alive`
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -42,10 +82,9 @@ impl Cell {
 }
 
 /// the `Universe` in which game plays. Represented as a `Vec` of `Cell`s.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Universe {
-    width: u16,
-    height: u16,
+    area: Area,
     cells: Vec<Cell>,
 }
 impl<U1: Into<usize>, U2: Into<usize>> std::ops::Index<(U1, U2)> for Universe {
@@ -75,23 +114,70 @@ impl Universe {
     fn get_idx(&self, row: impl Into<usize>, col: impl Into<usize>) -> usize {
         let row = row.into();
         let col = col.into();
+        assert!(
+            (0..self.area.height).contains(&(row as u16)),
+            "index out of range: len is {}, but index is {row}",
+            self.area.height,
+        );
+        assert!(
+            (0..self.area.width).contains(&(col as u16)),
+            "index out of range: len is {}, but index is {col}",
+            self.area.width,
+        );
         // Convert (x;y) to index
-        (row * self.width as usize) + col
+        let idx = (row * self.area.width as usize) + col;
+        assert!(
+            idx < self.cells.len(),
+            "index out of range: len is {}, but index is {idx}",
+            self.cells.len()
+        );
+        idx
     }
+    fn get_idx_res(&self, row: impl Into<usize>, col: impl Into<usize>) -> Option<usize> {
+        let row = row.into();
+        let col = col.into();
+        if !(0..self.area.height).contains(&(row as u16)) {
+            log::debug!("row is {row}, but len is {}", self.area.height);
+            return None;
+        }
+        if !(0..self.area.width).contains(&(col as u16)) {
+            log::debug!("col is {col}, but len is {}", self.area.width);
+            return None;
+        }
+        // Convert (x;y) to index
+        let idx = (row * self.area.width as usize) + col;
+        if idx >= self.cells.len() {
+            log::debug!("idx: {idx}, len: {}", self.cells.len());
+            return None;
+        }
+        // log::debug!("idx: {idx}");
+        Some(idx)
+    }
+    pub fn get(&self, idx: (impl Into<usize>, impl Into<usize>)) -> Option<&Cell> {
+        // log::debug!("get()");
+        let idx = self.get_idx_res(idx.0, idx.1)?;
+        self.cells.get(idx)
+    }
+    // pub fn get_mut(&mut self, idx: (impl Into<usize>, impl Into<usize>)) -> Option<&mut Cell> {
+    //     // log::debug!("get_mut()");
+    //     let idx = self.get_idx(idx.0, idx.1);
+    //     self.cells.get_mut(idx)
+    // }
 
     fn live_neighbour_count(&self, row: u16, col: u16) -> u8 {
         let mut sum = 0;
 
-        for delta_row in [self.height - 1, 0, 1] {
-            for delta_col in [self.width - 1, 0, 1] {
+        for delta_row in [self.area.height - 1, 0, 1] {
+            for delta_col in [self.area.width - 1, 0, 1] {
                 if delta_row == 0 && delta_col == 0 {
                     continue;
                 }
 
-                let neighbour_row = (row + delta_row) % self.height;
-                let neighbour_col = (col + delta_col) % self.width;
+                let neighbour_row = (row + delta_row) % self.area.height;
+                let neighbour_col = (col + delta_col) % self.area.width;
 
                 sum += self[(neighbour_row, neighbour_col)] as u8;
+                // sum += *self.get((neighbour_row, neighbour_col)).unwrap() as u8;
             }
         }
         sum
@@ -102,10 +188,13 @@ impl Universe {
         let mut cells = Vec::new();
 
         for line in s {
+            if line.starts_with('!') {
+                continue;
+            }
             for ch in line.chars() {
-                if ch == '#' || ch == '1' {
+                if ch == '#' || ch == '1' || ch == 'O' {
                     cells.push(Cell::Alive);
-                } else if ch == '_' || ch == ' ' || ch == '0' {
+                } else if ch == '_' || ch == ' ' || ch == '0' || ch == '.' {
                     cells.push(Cell::Dead);
                 } else {
                     eprintln!("can't do nothing with this character: {ch}");
@@ -113,11 +202,15 @@ impl Universe {
             }
         }
 
-        Universe {
+        let area = Area {
             width: s[0].len() as u16,
             height: s.len() as u16,
-            cells,
-        }
+        };
+        Universe { area, cells }
+    }
+    fn from_str(s: &str) -> Self {
+        let v = s.trim().lines().map(|l| l.into()).collect::<Vec<String>>();
+        Self::from_vec_str(&v)
     }
 
     /// Create universe with width, height: inserting starting shape into the middle
@@ -125,31 +218,31 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    fn from_figur(wh: (u16, u16), figur: &[String]) -> Result<Universe, HandleError> {
+    fn from_figur(area: Area, figur: &[String]) -> Result<Universe, HandleError> {
         let figur = Universe::from_vec_str(figur);
         let figur_alive = figur
             .cells
             .iter()
-            .filter(|cell| cell == &&Cell::Alive)
+            .filter(|cell| *cell == &Cell::Alive)
             .count();
 
-        if wh.0 < figur.width() || wh.1 < figur.height() {
+        if area < figur.area {
             return Err(HandleError::TooBig);
         }
 
-        let cells = vec![Cell::default(); (wh.0 * wh.1).into()];
-        let mut univ = Universe {
-            cells,
-            width: wh.0,
-            height: wh.1,
-        };
+        let cells = vec![Cell::default(); area.len()];
+        let mut univ = Universe { cells, area };
 
-        let (start_row, start_col) = ((wh.1 - figur.height()) / 2, (wh.0 - figur.width()) / 2);
+        let (start_row, start_col) = (
+            (area.height - figur.height()) / 2,
+            (area.width - figur.width()) / 2,
+        );
 
         let mut j = 0;
         for row in start_row as usize..start_row as usize + figur.height() as usize {
             for i in 0..figur.width() as usize {
                 univ[(row, start_col as usize + i)] = figur.cells[j];
+                // *univ.get_mut((row, start_col as usize + i)).unwrap() = figur.cells[j];
                 j += 1;
             }
         }
@@ -157,7 +250,7 @@ impl Universe {
         let univ_alive = univ
             .cells
             .iter()
-            .filter(|cell| cell == &&Cell::Alive)
+            .filter(|cell| *cell == &Cell::Alive)
             .count();
         if figur_alive == univ_alive {
             Ok(univ)
@@ -170,9 +263,10 @@ impl Universe {
     pub fn tick(&mut self) {
         let mut next = self.clone();
 
-        for row in 0..self.width {
-            for col in 0..self.height {
+        for row in 0..self.height() {
+            for col in 0..self.width() {
                 let idx = (row, col);
+                // let cell = self.get(idx).unwrap();
                 let cell = self[idx];
                 let live_neighbours = self.live_neighbour_count(row, col);
 
@@ -194,6 +288,7 @@ impl Universe {
                 };
 
                 next[idx] = next_cell;
+                // *next.get_mut(idx).unwrap() = next_cell;
             }
         }
 
@@ -201,70 +296,41 @@ impl Universe {
     }
 
     pub fn width(&self) -> u16 {
-        self.width
+        self.area.width
     }
 
     pub fn height(&self) -> u16 {
-        self.height
+        self.area.height
     }
 }
 
 impl Shape for Universe {
     fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                match self[(x, y)] {
-                    Cell::Alive => painter.paint(y.into(), x.into(), Color::White),
-                    Cell::Dead => continue,
+        for y in 0..self.height() {
+            for x in 0..self.width() {
+                match self.get((y, x)) {
+                    Some(Cell::Alive) => painter.paint(x.into(), y.into(), Color::White),
+                    Some(Cell::Dead) => continue,
+                    None => unreachable!("got None"),
                 }
             }
         }
     }
 }
 
-// impl fmt::Display for Universe {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         writeln!(f, "╭{}╮\r", "─".repeat(self.width as usize * 2))?;
-//         for line in self.cells.as_slice().chunks(self.width as usize) {
-//             write!(f, "│")?;
-//             for &cell in line {
-//                 let symbol = if cell == Cell::Dead { ' ' } else { '◼' }; // ◻
-//                 write!(f, "{symbol} ")?;
-//             }
-//             writeln!(f, "│\r")?;
-//         }
-//         writeln!(f, "╰{}╯\r", "─".repeat(self.width as usize * 2))?;
-//         Ok(())
-//     }
-// }
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    const WH: u16 = 20;
-
-    fn gen_uni(w: u16, h: u16, cells: &[bool]) -> Universe {
-        let cells = cells.iter().map(|c| (*c).into()).collect::<Vec<Cell>>();
-        Universe {
-            width: w,
-            height: h,
-            cells,
+impl std::fmt::Display for Universe {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "╭{}╮\r", "─".repeat(self.area.width as usize * 2))?;
+        for line in self.cells.as_slice().chunks(self.area.width as usize) {
+            write!(f, "│")?;
+            for &cell in line {
+                let symbol = if cell == Cell::Dead { '◻' } else { '◼' }; // ◻
+                write!(f, "{symbol} ")?;
+            }
+            writeln!(f, "│\r")?;
         }
-    }
-
-    #[test]
-    fn rabbit_hole() {
-        let rabbit = shapes::featherweigth_spaceship();
-        let rabbit_uni = Universe::from_vec_str(&rabbit);
-        let cells = [false, false, true, true, false, true, false, true, true];
-        let uni = gen_uni(3, 3, &cells);
-        assert_eq!(rabbit_uni, uni);
-    }
-    #[test]
-    fn full() {
-        let full = shapes::full(WH);
-        let cells = [true; WH.pow(2) as usize];
-        let uni = gen_uni(WH, WH, &cells);
-        assert_eq!(full, uni);
+        writeln!(f, "╰{}╯\r", "─".repeat(self.area.width as usize * 2))
     }
 }
+#[cfg(test)]
+mod tests;

@@ -1,4 +1,4 @@
-use crate::app::App;
+use crate::{app::App, Area};
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::Stylize,
@@ -7,46 +7,46 @@ use ratatui::{
     Frame,
 };
 
-pub fn ui(f: &mut Frame, app: &App) {
-    //  ____________________
-    // |          |         |
-    // |          |         |
-    // |          |         |
-    // |__________|_________|
+/// area of a braille character
+const BRAILLE: Area = Area {
+    width: 2,
+    height: 4,
+};
+
+pub fn ui(f: &mut Frame, app: &mut App) {
+    //  _cgol_______________
+    // |                    |
+    // |                    |
+    // |                    |
+    // |____________________|
     // |____________________|
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Min(0), Constraint::Length(1)])
+        .constraints([Constraint::Fill(1), Constraint::Length(1)])
         .split(f.area());
-
-    let main_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(50)])
-        .split(chunks[0]);
 
     let cgol = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .title("Conway's Game of Life");
-    // let universe = Paragraph::new(app.universe.to_string()).block(cgol);
-    // let universe = Canvas::new().block(cgol);
+    // 2 blocks less: border
+    let new_area: crate::Area = (
+        chunks[0].width * BRAILLE.width - 2 * BRAILLE.width,
+        chunks[0].height * BRAILLE.height - 2 * BRAILLE.height,
+    )
+        .into();
+    // apply the area change
+    if app.area != new_area {
+        app.area = new_area;
+        app.restart();
+    }
     let universe = Canvas::default()
-        // .x_bounds([0., main_chunks[0].height as f64 * 2. - 4.])
-        // .y_bounds([0., main_chunks[0].height as f64 * 2. - 4.])
+        // .x_bounds([0., chunks[0].height as f64 * 2. - 4.])
+        // .y_bounds([0., chunks[0].height as f64 * 2. - 4.])
         .paint(|ctx| ctx.draw(&app.universe))
         .block(cgol);
 
-    f.render_widget(universe, main_chunks[0]);
-
-    // f.render_widget(
-    //     universe,
-    //     Rect::new(
-    //         0,
-    //         0,
-    //         main_chunks[0].height * 2 - 4,
-    //         main_chunks[0].height - 1,
-    //     ),
-    // );
+    f.render_widget(universe, chunks[0]);
 
     let footer = Layout::default()
         .direction(Direction::Horizontal)
@@ -54,21 +54,19 @@ pub fn ui(f: &mut Frame, app: &App) {
         .split(chunks[1]);
 
     let current_keys_hint =
-        "[q]uit, [r]estart, [R]eset, [n]ext, [p]rev, play[ ]pause, 'k': faster, 'j': slower"
-            .yellow();
+        "[q]uit, [r]estart, [R]eset, [n]ext, [p]rev, play[ ]pause, speed: 'k' ↑, 'j' ↓".yellow();
 
-    let poll_t = format!(
-        "Poll time: {}",
+    let poll_t = {
         if let std::time::Duration::MAX = app.poll_t {
-            "max".into()
+            "paused".into()
         } else {
-            format!("{:.0?}", app.poll_t)
+            format!("Poll time: {:.0?}", app.poll_t)
         }
-    )
+    }
     .light_blue();
 
     let div = " | ".white();
-    let current_stats = vec![current_keys_hint, div.clone(), poll_t];
+    let current_stats = vec![current_keys_hint, div, poll_t];
     let footer_data = Line::from(current_stats);
 
     f.render_widget(footer_data, footer[0]);

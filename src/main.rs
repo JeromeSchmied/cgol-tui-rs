@@ -1,29 +1,34 @@
 use cgol_tui::{app::App, *};
-use ratatui::crossterm::{
-    event::{self, poll, Event, KeyEventKind},
-    terminal::size,
-};
+use ratatui::crossterm::event::{self, poll, Event, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
 use std::io;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // set up logger
+    fern::Dispatch::new()
+        // Add blanket level filter -
+        .level(log::LevelFilter::Debug)
+        // Output to stdout, files, and other Dispatch configurations
+        .chain(
+            std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(".cgoltui.log")?,
+        )
+        // Apply globally
+        .apply()?;
+
     // init terminal
     let mut terminal = ratatui::try_init()?;
 
-    // create app and run it with width and height from terminal size
-    // FIXME: use render_are.area() for size determination
-    let wh = size()?;
-    let wh = ((wh.1 - 3) * 4).min((wh.0 / 2 - 2) * 2);
-    let mut app = App::new(wh);
-
+    let mut app = App::default();
     let res = run_app(&mut terminal, &mut app);
 
     // reset terminal
     ratatui::try_restore()?;
 
-    if let Err(err) = res {
-        println!("Error: {err:?}");
-    }
+    // if any error has occured while executing, print it in cooked mode
+    res.inspect_err(|e| println!("error: {e:?}"))?;
 
     Ok(())
 }
@@ -32,15 +37,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
     let mut prev_poll_t = app.poll_t;
 
     loop {
-        app.set_wh();
-
         terminal.draw(|f| ui::ui(f, app))?;
 
         // Wait up to `poll_t` for another event
         if poll(app.poll_t)? {
             if let Event::Key(key) = event::read()? {
                 if key.kind != KeyEventKind::Press {
-                    return Ok(());
+                    continue;
                 }
                 match key.code {
                     kmaps::QUIT => break,
@@ -55,7 +58,6 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 }
             } else {
                 // resize and restart
-                app.set_wh();
                 app.restart();
             }
         } else {

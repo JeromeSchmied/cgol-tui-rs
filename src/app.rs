@@ -1,5 +1,4 @@
-use crate::{shapes, Universe, DEF_DUR};
-use ratatui::crossterm::terminal;
+use crate::{shapes, Area, Universe, DEF_DUR};
 use std::time::Duration;
 
 pub struct App {
@@ -7,27 +6,25 @@ pub struct App {
     pub i: usize,
     pub poll_t: Duration,
     pub paused: bool,
-    pub wh: (u16, u16),
+    pub area: Area,
 }
 impl Default for App {
     fn default() -> Self {
-        let i = 0;
-        let wh = terminal::size().expect("couldn't get terminal size");
         App {
-            wh,
-            universe: shapes::get(wh, i).unwrap(),
-            i,
+            area: Area::default(),
+            universe: Universe::default(),
+            i: 0,
             poll_t: DEF_DUR,
             paused: false,
         }
     }
 }
 impl App {
-    pub fn new(wh: u16) -> Self {
+    pub fn new(area: Area) -> Self {
         let i = 0;
         App {
-            wh,
-            universe: shapes::get(wh, i).unwrap(),
+            area,
+            universe: shapes::get(area, i).unwrap(),
             i,
             poll_t: DEF_DUR,
             paused: false,
@@ -36,10 +33,6 @@ impl App {
     // pub fn render_universe(&self) {
     //     println!("{}", self.universe);
     // }
-    pub fn set_wh(&mut self) {
-        let wh = size().expect("couldn't get terminal size");
-        self.wh = (wh.1 + 10) * 3;
-    }
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
         if self.paused {
@@ -51,8 +44,9 @@ impl App {
         self.paused = !self.paused;
     }
     pub fn restart(&mut self) {
-        self.universe =
-            shapes::get(self.wh, self.i).expect("display area is too small to fit current shape");
+        self.universe = shapes::get(self.area, self.i)
+            .inspect_err(|e| log::error!("{e:?}"))
+            .expect("display area is too small to fit current shape");
     }
 
     pub fn tick(&mut self) {
@@ -84,7 +78,7 @@ impl App {
         } else {
             self.i += 1;
         }
-        if let Ok(shape) = shapes::get(self.wh, self.i) {
+        if let Ok(shape) = shapes::get(self.area, self.i) {
             self.universe = shape;
         } else {
             eprintln!("couldn't switch to next shape");
@@ -96,7 +90,7 @@ impl App {
         } else {
             self.i = shapes::N as usize - 1;
         }
-        if let Ok(shape) = shapes::get(self.wh, self.i) {
+        if let Ok(shape) = shapes::get(self.area, self.i) {
             self.universe = shape;
         } else {
             eprintln!("couldn't switch to previous shape");

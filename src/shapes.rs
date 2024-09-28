@@ -1,7 +1,7 @@
 use super::*;
 
 /// Number of currently supported shapes
-pub const N: u8 = 9;
+pub const N: u8 = 10;
 
 #[derive(Debug)]
 pub enum HandleError {
@@ -23,23 +23,15 @@ pub fn get(area: Area, i: usize) -> Result<Universe, HandleError> {
 
     match i {
         0 => Universe::from_figur(area, &shapes::featherweigth_spaceship()),
-
         1 => Universe::from_figur(area, &shapes::copperhead()),
-
         2 => Universe::from_figur(area, &shapes::gosper_glider_gun()),
-
         3 => Ok(shapes::stripes(area)),
-
         4 => Ok(shapes::rand(area)),
-
         5 => Universe::from_figur(area, &shapes::rabbits()),
-
         6 => Universe::from_figur(area, &shapes::bonk_tie()),
-
         7 => Universe::from_figur(area, &shapes::acorn()),
-
         8 => Ok(shapes::full(area)),
-
+        9 => Ok(shapes::frame(area)),
         _ => Err(HandleError::OutOfRange),
     }
 }
@@ -52,17 +44,106 @@ fn get_test() {
     assert!(get(area, N.into()).is_err());
 }
 
+// height: 5
+// width: 5
+//  01234
+// 0.....0
+// 1.---.1
+// 2.|.|.2
+// 3.---.3
+// 4.....4
+//  01234
+pub fn frame(area: Area) -> Universe {
+    let cells = vec![Cell::Dead; area.len()];
+    let mut univ = Universe { area, cells };
+    if area.height < 3 || area.width < 3 {
+        return univ;
+    }
+    // horizontal
+    for i in [1, area.height - 2] {
+        for j in 1..area.width - 1 {
+            univ[(i, j)] = Cell::Alive;
+        }
+    }
+
+    // vertical
+    for j in [1, area.width - 2] {
+        for i in 2..area.height - 2 {
+            univ[(i, j)] = Cell::Alive;
+        }
+    }
+    univ
+}
+#[test]
+fn frame_test00() {
+    let area = Area::new(3u8, 2u8);
+    let univ = Universe::from_vec_str(&["___".to_owned(), "___".to_owned()]);
+    let frame = frame(area);
+    print!("{frame}");
+    assert_eq!(univ, frame);
+}
+#[test]
+fn frame_test0() {
+    let area = Area::new(3u8, 3u8);
+    let univ = Universe::from_vec_str(&["___".to_owned(), "_#_".to_owned(), "___".to_owned()]);
+    let frame = frame(area);
+    print!("{frame}");
+    assert_eq!(univ, frame);
+}
+#[test]
+fn frame_test1() {
+    let area = Area::new(4u8, 4u8);
+    let univ = Universe::from_vec_str(&[
+        "____".to_owned(),
+        "_##_".to_owned(),
+        "_##_".to_owned(),
+        "____".to_owned(),
+    ]);
+    let frame = frame(area);
+    print!("{frame}");
+    assert_eq!(univ, frame);
+}
+#[test]
+fn frame_test2() {
+    let area = Area::new(5u8, 5u8);
+    let univ = Universe::from_vec_str(&[
+        "_____".to_owned(),
+        "_###_".to_owned(),
+        "_#_#_".to_owned(),
+        "_###_".to_owned(),
+        "_____".to_owned(),
+    ]);
+    let frame = frame(area);
+    print!("{frame}");
+    assert_eq!(univ, frame);
+}
+#[test]
+fn frame_test3() {
+    let area = Area::new(6u8, 6u8);
+    let univ = Universe::from_vec_str(&[
+        "______".to_owned(),
+        "_####_".to_owned(),
+        "_#__#_".to_owned(),
+        "_#__#_".to_owned(),
+        "_####_".to_owned(),
+        "______".to_owned(),
+    ]);
+    let frame = frame(area);
+    print!("{frame}");
+    assert_eq!(univ, frame);
+}
+
 pub fn copperhead() -> Vec<String> {
     // ["_".repeat(5), "#_##".into(), "_".repeat(7), "#".into(), "_".repeat(6), "#".into(), "___##___#__###_"]
     [
-        "_____#_##___".to_owned(),
-        "____#______#".to_owned(),
-        "___##___#__#".to_owned(),
-        "##_#_____##_".to_owned(),
-        "##_#_____##_".to_owned(),
-        "___##___#__#".to_owned(),
-        "____#______#".to_owned(),
-        "_____#_##___".to_owned(),
+        "_____#_##___".into(),
+        "____#______#".into(),
+        "___##___#__#".into(),
+        "##_#_____##_".into(),
+        "##_#_____##_".into(),
+        "___##___#__#".into(),
+        "____#______#".into(),
+        "_____#_##___".into(),
     ]
     .to_vec()
 }
