@@ -1,7 +1,7 @@
 [package]
 name = "cgol-tui"
-version = "0.4.0"
-authors = ["Jeromos Kovacs <iITsnot.me214@proton.me>"]
+version = "0.5.2"
+authors = ["Jeromos Kovacs <iitsnotme214@proton.me>"]
 edition = "2021"
 description = "Conway's Game of Life implementation with a TUI"
 license = "MIT OR Apache-2.0"
@@ -12,6 +12,4 @@ categories = ["games"]
 
 [dependencies]
 fastrand = "2.1.1"
-fern = "0.6.2"
-log = "0.4.22"
 ratatui = "0.28.1"

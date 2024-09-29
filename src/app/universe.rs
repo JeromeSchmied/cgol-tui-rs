@@ -58,36 +58,6 @@ impl Universe {
         );
         idx
     }
-    fn get_idx_res(&self, row: impl Into<usize>, col: impl Into<usize>) -> Option<usize> {
-        let row = row.into();
-        let col = col.into();
-        if !(0..self.area.height).contains(&(row as u16)) {
-            log::debug!("row is {row}, but len is {}", self.area.height);
-            return None;
-        }
-        if !(0..self.area.width).contains(&(col as u16)) {
-            log::debug!("col is {col}, but len is {}", self.area.width);
-            return None;
-        }
-        // Convert (x;y) to index
-        let idx = (row * self.area.width as usize) + col;
-        if idx >= self.cells.len() {
-            log::debug!("idx: {idx}, len: {}", self.cells.len());
-            return None;
-        }
-        // log::debug!("idx: {idx}");
-        Some(idx)
-    }
-    pub fn get(&self, idx: (impl Into<usize>, impl Into<usize>)) -> Option<&Cell> {
-        // log::debug!("get()");
-        let idx = self.get_idx_res(idx.0, idx.1)?;
-        self.cells.get(idx)
-    }
-    // pub fn get_mut(&mut self, idx: (impl Into<usize>, impl Into<usize>)) -> Option<&mut Cell> {
-    //     // log::debug!("get_mut()");
-    //     let idx = self.get_idx(idx.0, idx.1);
-    //     self.cells.get_mut(idx)
-    // }
 
     pub fn live_neighbour_count(&self, row: u16, col: u16) -> u8 {
         let mut sum = 0;
@@ -102,14 +72,13 @@ impl Universe {
                 let neighbour_col = (col + delta_col) % self.area.width;
 
                 sum += self[(neighbour_row, neighbour_col)] as u8;
-                // sum += *self.get((neighbour_row, neighbour_col)).unwrap() as u8;
             }
         }
         sum
     }
 
     /// Convert properly formatted Vec of Strings to Universe
-    pub fn from_vec_str(s: &[String]) -> Self {
+    fn from_vec_str(s: &[String]) -> Result<Self, String> {
         let width = s.iter().map(|ln| ln.chars().count()).max().unwrap_or(0) as u16;
         let height = s.len() as u16;
         let area = Area::new(width, height);
@@ -117,26 +86,14 @@ impl Universe {
 
         for (i, line) in s.iter().enumerate() {
             if line.starts_with('!') {
-                continue;
+                continue; // ignore comment
             }
             for (j, ch) in line.chars().enumerate() {
-                if ch == 'O' || ch == '#' {
-                    univ[(i, j)] = Cell::Alive;
-                }
+                univ[(i, j)] = ch.try_into()?;
             }
         }
 
-        univ
-    }
-
-    pub fn from_str(s: &str) -> Self {
-        let v = s
-            .trim()
-            .lines()
-            .map(str::trim)
-            .map(std::convert::Into::into)
-            .collect::<Vec<String>>();
-        Self::from_vec_str(&v)
+        Ok(univ)
     }
 
     /// Create universe with width, height: inserting starting shape into the middle
@@ -144,20 +101,21 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(area: Area, figur: &[String]) -> Result<Universe, HandleError> {
-        let figur = Universe::from_vec_str(figur);
-        let figur_alive = figur
-            .cells
-            .iter()
-            .filter(|cell| *cell == &Cell::Alive)
-            .count();
+    pub fn from_figur(area: Area, figur: Universe) -> Result<Universe, HandleError> {
+        let count_alive = |univ: &Universe| -> usize {
+            univ.cells
+                .iter()
+                .filter(|cell| *cell == &Cell::Alive)
+                .count()
+        };
+
+        let figur_alive = count_alive(&figur);
 
         if area < figur.area {
             return Err(HandleError::TooBig);
         }
 
-        let cells = vec![Cell::default(); area.len()];
-        let mut univ = Universe { area, cells };
+        let mut univ = shapes::empty(area);
 
         let (start_row, start_col) = (
             (area.height - figur.height()) / 2,
@@ -168,17 +126,11 @@ impl Universe {
         for row in start_row as usize..start_row as usize + figur.height() as usize {
             for i in 0..figur.width() as usize {
                 univ[(row, start_col as usize + i)] = figur.cells[j];
-                // *univ.get_mut((row, start_col as usize + i)).unwrap() = figur.cells[j];
                 j += 1;
             }
         }
 
-        let univ_alive = univ
-            .cells
-            .iter()
-            .filter(|cell| *cell == &Cell::Alive)
-            .count();
-        if figur_alive == univ_alive {
+        if figur_alive == count_alive(&univ) {
             Ok(univ)
         } else {
             Err(HandleError::Other)
@@ -192,7 +144,6 @@ impl Universe {
         for row in 0..self.height() {
             for col in 0..self.width() {
                 let idx = (row, col);
-                // let cell = self.get(idx).unwrap();
                 let cell = self[idx];
                 let live_neighbours = self.live_neighbour_count(row, col);
 
@@ -214,7 +165,6 @@ impl Universe {
                 };
 
                 next[idx] = next_cell;
-                // *next.get_mut(idx).unwrap() = next_cell;
             }
         }
 
@@ -229,15 +179,27 @@ impl Universe {
         self.area.height
     }
 }
+impl std::str::FromStr for Universe {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let v = s
+            .trim()
+            .lines()
+            .map(str::trim)
+            .map(std::convert::Into::into)
+            .collect::<Vec<String>>();
+        Self::from_vec_str(&v)
+    }
+}
 
 impl Shape for Universe {
     fn draw(&self, painter: &mut ratatui::widgets::canvas::Painter) {
         for y in 0..self.height() {
             for x in 0..self.width() {
-                match self.get((y, x)) {
-                    Some(Cell::Alive) => painter.paint(x.into(), y.into(), Color::White),
-                    Some(Cell::Dead) => continue,
-                    None => unreachable!("got None"),
+                match self[(y, x)] {
+                    Cell::Alive => painter.paint(x.into(), y.into(), Color::White),
+                    Cell::Dead => continue,
                 }
             }
         }
@@ -246,8 +208,8 @@ impl Shape for Universe {
 
 impl std::fmt::Display for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "╭{}╮\r", "─".repeat(self.area.width as usize * 2))?;
-        for line in self.cells.as_slice().chunks(self.area.width as usize) {
+        writeln!(f, "╭{}╮\r", "─".repeat(self.width() as usize * 2))?;
+        for line in self.cells.as_slice().chunks(self.width() as usize) {
             write!(f, "│")?;
             for &cell in line {
                 let symbol = if cell == Cell::Dead { '◻' } else { '◼' }; // ◻
@@ -255,6 +217,6 @@ impl std::fmt::Display for Universe {
             }
             writeln!(f, "│\r")?;
         }
-        writeln!(f, "╰{}╯\r", "─".repeat(self.area.width as usize * 2))
+        writeln!(f, "╰{}╯\r", "─".repeat(self.width() as usize * 2))
     }
 }

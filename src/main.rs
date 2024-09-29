@@ -1,26 +1,39 @@
-use app::App;
+use app::{App, Universe};
+use std::{io::Read, str::FromStr};
 
 pub mod app;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // set up logger
-    fern::Dispatch::new()
-        // Add blanket level filter
-        // TODO: cli -v^n, 0 < n < 5
-        .level(log::LevelFilter::Debug)
-        // Output to stdout, files, and other Dispatch configurations
-        .chain(
-            std::fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(".cgoltui.log")?,
-        )
-        // Apply globally
-        .apply()?;
+    let args = std::env::args().skip(1).collect::<Vec<_>>();
+    if args.contains(&"-h".into()) || args.contains(&"--help".into()) {
+        println!(
+            "A Conway's Game of Life viewer TUI.
+            
+USAGE: cgol-tui [<pattern>,...]
+
+where <pattern> is either a .cells file, or - for stdin"
+        );
+        std::process::exit(1);
+    }
+
+    let piped_universe = {
+        let mut univ = String::new();
+        if args.len() == 1 && args[0] == "-" {
+            std::io::stdin().read_to_string(&mut univ)?;
+        }
+        Universe::from_str(&univ)?
+    };
+
+    let mut universes = args
+        .iter()
+        .flat_map(std::fs::read_to_string)
+        .map(|s| Universe::from_str(&s))
+        .collect::<Result<Vec<_>, _>>()?;
+    universes.push(piped_universe);
+    let mut app = App::default().with_universes(universes);
 
     let mut terminal = ratatui::try_init()?;
 
-    let mut app = App::default();
     let res = app.run(&mut terminal);
 
     ratatui::try_restore()?;

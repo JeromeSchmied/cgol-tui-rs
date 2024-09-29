@@ -1,12 +1,21 @@
-# Conway's Game of Life tui in Rust
+# Conway's Game of Life TUI in Rust
 
 ## Usage
 
-either
+installation methods
 
 -   `cargo install cgol-tui`
 -   `cargo install --locked --git "https://github.com/JeromeSchmied/cgol-tui-rs"`
--   clone the repo and run `cargo r`
+-   clone the repo and run `cargo install --locked --path .`
+
+after
+
+`[curl "https://conwaylife.com/patterns/<pattern>.cells" | ] cgol-tui [[-],<pattern>.cells,...]`
+eg.:
+
+-   `cgol-tui`
+-   `curl https://conwaylife.com/patterns/fx153.cells | cgol-tui -` the `-` stands for `stdin`
+-   `cgol-tui my_own_pattern.cells fx153.cells`
 
 ## Sample
 
@@ -19,14 +28,15 @@ either
 -   [x] error handling
 -   [x] publishing to crates.io
 -   [x] changing to `Canvas` for rendering viewer block
--   [ ] the ability to parse `.cells` files, from [conwaylife.com](https://conwaylife.com/patterns)
+-   [x] the ability to parse `.cells` files, from [conwaylife.com](https://conwaylife.com/patterns)
+-   [ ] display the names of patterns
 
 ## Acknowledgements
 
 -   The core of this app is adapted from the [Rust-Wasm tutorial](https://rustwasm.github.io/docs/book/).
 -   main dependencies:
-    -   ratatui: ui
-    -   crossterm: ratatui backend
+    -   [ratatui](https://ratatui.rs): ui
+    -   [crossterm](https://github.com/crossterm-rs/crossterm): ratatui backend
 
 ## License
 
