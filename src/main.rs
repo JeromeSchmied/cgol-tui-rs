@@ -1,6 +1,5 @@
-use std::io::Read;
-
 use app::{App, Universe};
+use std::io::Read;
 
 pub mod app;
 
