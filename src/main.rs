@@ -16,25 +16,21 @@ where <pattern> is either a .cells file, or - for stdin"
         std::process::exit(1);
     }
 
-    let piped_universes = {
+    let piped_universe = {
         let mut univ = String::new();
         if args.len() == 1 && args[0] == "-" {
             std::io::stdin().read_to_string(&mut univ)?;
         }
-
-        if univ.is_empty() {
-            vec![]
-        } else {
-            vec![Universe::from_str(&univ)?]
-        }
+        Universe::from_str(&univ)?
     };
 
-    let universes = args
+    let mut universes = args
         .iter()
         .flat_map(std::fs::read_to_string)
         .map(|s| Universe::from_str(&s))
         .collect::<Result<Vec<_>, _>>()?;
-    let mut app = App::default().with_universes([universes, piped_universes].concat());
+    universes.push(piped_universe);
+    let mut app = App::default().with_universes(universes);
 
     let mut terminal = ratatui::try_init()?;
 
