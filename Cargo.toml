@@ -1,7 +1,7 @@
 [package]
 name = "cgol-tui"
 version = "0.5.2"
-authors = ["Jeromos Kovacs <iITsnot.me214@proton.me>"]
+authors = ["Jeromos Kovacs <iitsnotme214@proton.me>"]
 edition = "2021"
 description = "Conway's Game of Life implementation with a TUI"
 license = "MIT OR Apache-2.0"
