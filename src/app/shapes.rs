@@ -14,12 +14,12 @@ pub enum HandleError {
 
 pub fn all() -> Vec<Universe> {
     vec![
-        Universe::from_str(FEATHERWEIGTH_SPACESHIP),
-        Universe::from_str(GOSPER_GLIDER_GUN),
-        Universe::from_str(COPPERHEAD),
-        Universe::from_str(RABBITS),
-        Universe::from_str(BONK_TIE),
-        Universe::from_str(ACORN),
+        Universe::from_str(FEATHERWEIGTH_SPACESHIP).unwrap(),
+        Universe::from_str(GOSPER_GLIDER_GUN).unwrap(),
+        Universe::from_str(COPPERHEAD).unwrap(),
+        Universe::from_str(RABBITS).unwrap(),
+        Universe::from_str(BONK_TIE).unwrap(),
+        Universe::from_str(ACORN).unwrap(),
     ]
 }
 

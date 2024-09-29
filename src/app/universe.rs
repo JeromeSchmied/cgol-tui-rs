@@ -109,7 +109,7 @@ impl Universe {
     }
 
     /// Convert properly formatted Vec of Strings to Universe
-    pub fn from_vec_str(s: &[String]) -> Self {
+    pub fn from_vec_str(s: &[String]) -> Result<Self, String> {
         let width = s.iter().map(|ln| ln.chars().count()).max().unwrap_or(0) as u16;
         let height = s.len() as u16;
         let area = Area::new(width, height);
@@ -117,19 +117,17 @@ impl Universe {
 
         for (i, line) in s.iter().enumerate() {
             if line.starts_with('!') {
-                continue;
+                continue; // ignore comment
             }
             for (j, ch) in line.chars().enumerate() {
-                if ch == 'O' {
-                    univ[(i, j)] = Cell::Alive;
-                }
+                univ[(i, j)] = ch.try_into()?;
             }
         }
 
-        univ
+        Ok(univ)
     }
 
-    pub fn from_str(s: impl AsRef<str>) -> Self {
+    pub fn from_str(s: impl AsRef<str>) -> Result<Self, String> {
         let v = s
             .as_ref()
             .trim()

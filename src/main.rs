@@ -41,7 +41,7 @@ where <pattern> is either a .cells file, or - for stdin"
         if univ.is_empty() {
             vec![]
         } else {
-            vec![Universe::from_str(univ)]
+            vec![Universe::from_str(univ)?]
         }
     };
 
@@ -49,7 +49,7 @@ where <pattern> is either a .cells file, or - for stdin"
         .iter()
         .flat_map(std::fs::read_to_string)
         .map(Universe::from_str)
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>, _>>()?;
     let mut app = App::default().with_universes([universes, piped_universes].concat());
 
     let mut terminal = ratatui::try_init()?;

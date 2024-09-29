@@ -14,6 +14,19 @@ impl From<bool> for Cell {
         }
     }
 }
+impl TryFrom<char> for Cell {
+    type Error = String;
+
+    fn try_from(ch: char) -> Result<Self, Self::Error> {
+        match ch {
+            'O' => Ok(Cell::Alive),
+            '.' => Ok(Cell::Dead),
+            _ => Err(format!(
+                "parse error: {ch:?} is an invalid character, should be either '.' or 'O'"
+            )),
+        }
+    }
+}
 impl Cell {
     fn toggle(&mut self) {
         *self = match *self {
