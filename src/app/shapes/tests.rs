@@ -71,11 +71,8 @@ fn featherweight_spaceship_test() {
     let alive = [(0u8, 2u8), (1u8, 0u8), (1u8, 2u8), (2u8, 1u8), (2u8, 2u8)];
     for alive_cell in alive {
         dbg!(alive_cell);
-        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+        assert_eq!(m[alive_cell], Cell::Alive);
     }
-    assert!(m.get((3u8, 3u8)).is_none());
-    assert!(m.get((3u8, 4u8)).is_none());
-    assert!(m.get((4u8, 3u8)).is_none());
 }
 
 #[test]
@@ -97,10 +94,8 @@ fn rabbits_test() {
     ];
     for alive_cell in alive {
         dbg!(alive_cell);
-        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+        assert_eq!(m[alive_cell], Cell::Alive);
     }
-    assert!(m.get((4u8, 8u8)).is_none());
-    assert!(m.get((8u8, 4u8)).is_none());
 }
 #[test]
 fn bonk_tie_test() {
@@ -119,10 +114,8 @@ fn bonk_tie_test() {
     ];
     for alive_cell in alive {
         dbg!(alive_cell);
-        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+        assert_eq!(m[alive_cell], Cell::Alive);
     }
-    assert!(m.get((4u8, 3u8)).is_none());
-    assert!(m.get((3u8, 4u8)).is_none());
 }
 
 #[test]
@@ -142,10 +135,8 @@ fn acorn_test() {
     ];
     for alive_cell in alive {
         dbg!(alive_cell);
-        assert_eq!(m.get(alive_cell), Some(&Cell::Alive));
+        assert_eq!(m[alive_cell], Cell::Alive);
     }
-    assert!(m.get((4u8, 3u8)).is_none());
-    assert!(m.get((3u8, 4u8)).is_none());
 }
 #[test]
 fn stripes_test() {
@@ -154,10 +145,6 @@ fn stripes_test() {
     assert!(m.cells.is_empty());
     assert_eq!(m.area, area);
     dbg!(&m);
-    assert!(m.get((4u8, 3u8)).is_none());
-    assert!(m.get((3u8, 4u8)).is_none());
-    assert!(m.get((0u8, 1u8)).is_none());
-    assert!(m.get((1u8, 0u8)).is_none());
 }
 #[test]
 fn full_test() {
@@ -169,9 +156,7 @@ fn full_test() {
     for i in 0..m.height() - 1 {
         for j in 0..m.width() - 1 {
             dbg!((i, j));
-            assert_eq!(m.get((i, j)), Some(&Cell::Alive));
+            assert_eq!(m[(i, j)], Cell::Alive);
         }
     }
-    assert!(m.get((4u8, 3u8)).is_none());
-    assert!(m.get((3u8, 4u8)).is_none());
 }

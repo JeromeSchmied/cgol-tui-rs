@@ -41,22 +41,22 @@ fn halp() {
     let idx: (u8, u8) = (0, 0);
     let x = univ[idx];
     assert_eq!(x, false.into());
-    assert_eq!(univ.get(idx), Some(&x));
+    assert_eq!(univ[idx], x);
 
     let idx: (u8, u8) = (0, 1);
     let x = univ[idx];
     assert_eq!(x, true.into());
-    assert_eq!(univ.get(idx), Some(&x));
+    assert_eq!(univ[idx], x);
 
     let idx: (u8, u8) = (1, 0);
     let x = univ[idx];
     assert_eq!(x, true.into());
-    assert_eq!(univ.get(idx), Some(&x));
+    assert_eq!(univ[idx], x);
 
     let idx: (u8, u8) = (1, 1);
     let x = univ[idx];
     assert_eq!(x, false.into());
-    assert_eq!(univ.get(idx), Some(&x));
+    assert_eq!(univ[idx], x);
 }
 
 #[test]

@@ -27,11 +27,3 @@ impl TryFrom<char> for Cell {
         }
     }
 }
-impl Cell {
-    fn toggle(&mut self) {
-        *self = match *self {
-            Cell::Dead => Cell::Alive,
-            Cell::Alive => Cell::Dead,
-        }
-    }
-}
