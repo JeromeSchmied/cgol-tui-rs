@@ -12,6 +12,4 @@ categories = ["games"]
 
 [dependencies]
 fastrand = "2.1.1"
-fern = "0.6.2"
-log = "0.4.22"
 ratatui = "0.28.1"

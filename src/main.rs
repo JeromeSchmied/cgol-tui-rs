@@ -4,23 +4,7 @@ use std::{io::Read, str::FromStr};
 pub mod app;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // set up logger
-    fern::Dispatch::new()
-        // Add blanket level filter
-        // TODO: cli -v^n, 0 < n < 5
-        .level(log::LevelFilter::Debug)
-        // Output to stdout, files, and other Dispatch configurations
-        .chain(
-            std::fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(".cgoltui.log")?,
-        )
-        // Apply globally
-        .apply()?;
-
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    log::debug!("args: {args:?}");
     if args.contains(&"-h".into()) || args.contains(&"--help".into()) {
         println!(
             "A Conway's Game of Life viewer TUI.
