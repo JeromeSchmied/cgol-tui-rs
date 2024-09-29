@@ -6,7 +6,7 @@ fn frame_test00() {
     let univ = Universe::from_vec_str(&["...".to_owned(), "...".to_owned()]);
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, frame);
+    assert_eq!(univ, Ok(frame));
 }
 #[test]
 fn frame_test0() {
@@ -14,7 +14,7 @@ fn frame_test0() {
     let univ = Universe::from_vec_str(&["...".to_owned(), ".O.".to_owned(), "...".to_owned()]);
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, frame);
+    assert_eq!(univ, Ok(frame));
 }
 #[test]
 fn frame_test1() {
@@ -27,7 +27,7 @@ fn frame_test1() {
     ]);
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, frame);
+    assert_eq!(univ, Ok(frame));
 }
 #[test]
 fn frame_test2() {
@@ -41,7 +41,7 @@ fn frame_test2() {
     ]);
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, frame);
+    assert_eq!(univ, Ok(frame));
 }
 #[test]
 fn frame_test3() {
@@ -56,13 +56,13 @@ fn frame_test3() {
     ]);
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, frame);
+    assert_eq!(univ, Ok(frame));
 }
 
 #[test]
 fn featherweight_spaceship_test() {
     let area = Area::new(3, 3);
-    let m = Universe::from_str(FEATHERWEIGTH_SPACESHIP);
+    let m = Universe::from_str(FEATHERWEIGTH_SPACESHIP).unwrap();
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [(0u8, 2u8), (1u8, 0u8), (1u8, 2u8), (2u8, 1u8), (2u8, 2u8)];
@@ -78,7 +78,7 @@ fn featherweight_spaceship_test() {
 #[test]
 fn rabbits_test() {
     let area = Area::new(8, 4);
-    let m = Universe::from_str(RABBITS);
+    let m = Universe::from_str(RABBITS).unwrap();
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [
@@ -102,7 +102,7 @@ fn rabbits_test() {
 #[test]
 fn bonk_tie_test() {
     let area = Area::new(3, 5);
-    let m = Universe::from_str(BONK_TIE);
+    let m = Universe::from_str(BONK_TIE).unwrap();
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [
@@ -125,7 +125,7 @@ fn bonk_tie_test() {
 #[test]
 fn acorn_test() {
     let area = Area::new(7, 3);
-    let m = Universe::from_str(ACORN);
+    let m = Universe::from_str(ACORN).unwrap();
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [

@@ -13,7 +13,7 @@ OO..O
 
 ...O
 ..O";
-    let univ = Universe::from_str(figur);
+    let univ = Universe::from_str(figur).unwrap();
     let cells = [
         /* 1st row */ false, false, true, false, false, /* 2nd row */ true, true, false,
         false, true, /* 3rd row */ false, false, false, false, false,
@@ -62,8 +62,11 @@ fn halp() {
 #[test]
 fn bigass_tickler() {
     let area = Area::new(8, 8);
-    let mut univ =
-        Universe::from_figur(area, Universe::from_str(shapes::FEATHERWEIGTH_SPACESHIP)).unwrap();
+    let mut univ = Universe::from_figur(
+        area,
+        Universe::from_str(shapes::FEATHERWEIGTH_SPACESHIP).unwrap(),
+    )
+    .unwrap();
 
     let exp_unis = [
         "\
@@ -366,6 +369,7 @@ O.O.....
     ];
 
     for exp_uni in exp_unis.map(Universe::from_str) {
+        let exp_uni = exp_uni.unwrap();
         println!("exp univ:\n{exp_uni}");
         println!("univ:\n{univ}");
         assert_eq!(univ, exp_uni);
@@ -381,7 +385,8 @@ fn neighbours() {
 .OO.
 ..O.
 ..O.",
-    );
+    )
+    .unwrap();
     let nghbrs = |coord: (u16, u16)| -> u8 { univ.live_neighbour_count(coord.0, coord.1) };
 
     // 1. row
