@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn frame_test00() {
     let area = Area::new(3, 2);
-    let univ = Universe::from_vec_str(&["...".to_owned(), "...".to_owned()]);
+    let univ = Universe::from_str("...\n...");
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, Ok(frame));
@@ -11,7 +11,7 @@ fn frame_test00() {
 #[test]
 fn frame_test0() {
     let area = Area::new(3, 3);
-    let univ = Universe::from_vec_str(&["...".to_owned(), ".O.".to_owned(), "...".to_owned()]);
+    let univ = Universe::from_str("...\n.O.\n...");
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, Ok(frame));
@@ -19,12 +19,13 @@ fn frame_test0() {
 #[test]
 fn frame_test1() {
     let area = Area::new(4, 4);
-    let univ = Universe::from_vec_str(&[
-        "....".to_owned(),
-        ".OO.".to_owned(),
-        ".OO.".to_owned(),
-        "....".to_owned(),
-    ]);
+    let univ = Universe::from_str(
+        "\
+....
+.OO.
+.OO.
+....",
+    );
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, Ok(frame));
@@ -32,13 +33,14 @@ fn frame_test1() {
 #[test]
 fn frame_test2() {
     let area = Area::new(5, 5);
-    let univ = Universe::from_vec_str(&[
-        ".....".to_owned(),
-        ".OOO.".to_owned(),
-        ".O.O.".to_owned(),
-        ".OOO.".to_owned(),
-        ".....".to_owned(),
-    ]);
+    let univ = Universe::from_str(
+        "\
+.....
+.OOO.
+.O.O.
+.OOO.
+.....",
+    );
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, Ok(frame));
@@ -46,14 +48,15 @@ fn frame_test2() {
 #[test]
 fn frame_test3() {
     let area = Area::new(6, 6);
-    let univ = Universe::from_vec_str(&[
-        "......".to_owned(),
-        ".OOOO.".to_owned(),
-        ".O..O.".to_owned(),
-        ".O..O.".to_owned(),
-        ".OOOO.".to_owned(),
-        "......".to_owned(),
-    ]);
+    let univ = Universe::from_str(
+        "\
+......
+.OOOO.
+.O..O.
+.O..O.
+.OOOO.
+......",
+    );
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, Ok(frame));

@@ -109,7 +109,7 @@ impl Universe {
     }
 
     /// Convert properly formatted Vec of Strings to Universe
-    pub fn from_vec_str(s: &[String]) -> Result<Self, String> {
+    fn from_vec_str(s: &[String]) -> Result<Self, String> {
         let width = s.iter().map(|ln| ln.chars().count()).max().unwrap_or(0) as u16;
         let height = s.len() as u16;
         let area = Area::new(width, height);
