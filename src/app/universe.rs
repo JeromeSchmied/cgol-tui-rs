@@ -120,7 +120,7 @@ impl Universe {
                 continue;
             }
             for (j, ch) in line.chars().enumerate() {
-                if ch == 'O' || ch == '#' {
+                if ch == 'O' {
                     univ[(i, j)] = Cell::Alive;
                 }
             }

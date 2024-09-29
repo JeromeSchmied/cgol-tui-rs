@@ -92,14 +92,14 @@ pub fn frame(area: Area) -> Universe {
 }
 
 pub const COPPERHEAD: &str = "\
-_____#_##___
-____#______#
-___##___#__#
-##_#_____##_
-##_#_____##_
-___##___#__#
-____#______#
-_____#_##___";
+.....O.OO...
+....O......O
+...OO...O..O
+OO.O.....OO.
+OO.O.....OO.
+...OO...O..O
+....O......O
+.....O.OO...";
 
 pub const GOSPER_GLIDER_GUN: &str = "\
 !Name: Gosper glider gun
@@ -119,27 +119,27 @@ OO........O...O.OO....O.O
 
 /// 3x3
 pub const FEATHERWEIGTH_SPACESHIP: &str = "\
-__#
- #_#
- _##";
+..O
+O.O
+.OO";
 
 /// 8x4
 pub const RABBITS: &str = "\
-#_____#_
-__#___#_
-__#__#_#
-_#_#____";
+O.....O.
+..O...O.
+..O..O.O
+.O.O....";
 
 /// 3×5
 pub const BONK_TIE: &str = "\
-##_
-##_
-__#
-__#
-__#";
+OO
+OO
+..O
+..O
+..O";
 
 /// 7×3
 pub const ACORN: &str = "\
-_#_____
-___#___
-##__###";
+.O
+...O
+OO..OOO";

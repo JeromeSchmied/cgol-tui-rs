@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn frame_test00() {
     let area = Area::new(3, 2);
-    let univ = Universe::from_vec_str(&["___".to_owned(), "___".to_owned()]);
+    let univ = Universe::from_vec_str(&["...".to_owned(), "...".to_owned()]);
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, frame);
@@ -11,7 +11,7 @@ fn frame_test00() {
 #[test]
 fn frame_test0() {
     let area = Area::new(3, 3);
-    let univ = Universe::from_vec_str(&["___".to_owned(), "_#_".to_owned(), "___".to_owned()]);
+    let univ = Universe::from_vec_str(&["...".to_owned(), ".O.".to_owned(), "...".to_owned()]);
     let frame = frame(area);
     print!("{frame}");
     assert_eq!(univ, frame);
@@ -20,10 +20,10 @@ fn frame_test0() {
 fn frame_test1() {
     let area = Area::new(4, 4);
     let univ = Universe::from_vec_str(&[
-        "____".to_owned(),
-        "_##_".to_owned(),
-        "_##_".to_owned(),
-        "____".to_owned(),
+        "....".to_owned(),
+        ".OO.".to_owned(),
+        ".OO.".to_owned(),
+        "....".to_owned(),
     ]);
     let frame = frame(area);
     print!("{frame}");
@@ -33,11 +33,11 @@ fn frame_test1() {
 fn frame_test2() {
     let area = Area::new(5, 5);
     let univ = Universe::from_vec_str(&[
-        "_____".to_owned(),
-        "_###_".to_owned(),
-        "_#_#_".to_owned(),
-        "_###_".to_owned(),
-        "_____".to_owned(),
+        ".....".to_owned(),
+        ".OOO.".to_owned(),
+        ".O.O.".to_owned(),
+        ".OOO.".to_owned(),
+        ".....".to_owned(),
     ]);
     let frame = frame(area);
     print!("{frame}");
@@ -47,12 +47,12 @@ fn frame_test2() {
 fn frame_test3() {
     let area = Area::new(6, 6);
     let univ = Universe::from_vec_str(&[
-        "______".to_owned(),
-        "_####_".to_owned(),
-        "_#__#_".to_owned(),
-        "_#__#_".to_owned(),
-        "_####_".to_owned(),
-        "______".to_owned(),
+        "......".to_owned(),
+        ".OOOO.".to_owned(),
+        ".O..O.".to_owned(),
+        ".O..O.".to_owned(),
+        ".OOOO.".to_owned(),
+        "......".to_owned(),
     ]);
     let frame = frame(area);
     print!("{frame}");
