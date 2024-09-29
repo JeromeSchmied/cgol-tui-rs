@@ -1,13 +1,14 @@
 pub use area::Area;
 pub use cell::Cell;
-use ratatui::crossterm::event::{self, Event, KeyEventKind};
+use ratatui::crossterm::event::{self, poll, Event, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
 pub use shapes::HandleError;
-use std::{io, time::Duration};
+use std::io;
+use std::time::Duration;
 pub use universe::Universe;
 
 /// Default poll duration
-const DEF_DUR: Duration = Duration::from_millis(400);
+pub const DEF_DUR: Duration = Duration::from_millis(400);
 
 mod area;
 mod cell;
@@ -143,7 +144,7 @@ impl App {
             terminal.draw(|f| ui::ui(f, self))?;
 
             // Wait up to `poll_t` for another event
-            if event::poll(self.poll_t)? {
+            if poll(self.poll_t)? {
                 if let Event::Key(key) = event::read()? {
                     if key.kind != KeyEventKind::Press {
                         continue;
