@@ -1,5 +1,5 @@
 use app::{App, Universe};
-use std::io::Read;
+use std::{io::Read, str::FromStr};
 
 pub mod app;
 
@@ -41,14 +41,14 @@ where <pattern> is either a .cells file, or - for stdin"
         if univ.is_empty() {
             vec![]
         } else {
-            vec![Universe::from_str(univ)?]
+            vec![Universe::from_str(&univ)?]
         }
     };
 
     let universes = args
         .iter()
         .flat_map(std::fs::read_to_string)
-        .map(Universe::from_str)
+        .map(|s| Universe::from_str(&s))
         .collect::<Result<Vec<_>, _>>()?;
     let mut app = App::default().with_universes([universes, piped_universes].concat());
 

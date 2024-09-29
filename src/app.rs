@@ -3,6 +3,7 @@ pub use cell::Cell;
 use ratatui::crossterm::event::{self, Event, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
 pub use shapes::HandleError;
+pub use std::str::FromStr;
 use std::{io, time::Duration};
 pub use universe::Universe;
 

@@ -127,17 +127,6 @@ impl Universe {
         Ok(univ)
     }
 
-    pub fn from_str(s: impl AsRef<str>) -> Result<Self, String> {
-        let v = s
-            .as_ref()
-            .trim()
-            .lines()
-            .map(str::trim)
-            .map(std::convert::Into::into)
-            .collect::<Vec<String>>();
-        Self::from_vec_str(&v)
-    }
-
     /// Create universe with width, height: inserting starting shape into the middle
     ///
     /// # Errors
@@ -225,6 +214,19 @@ impl Universe {
 
     pub fn height(&self) -> u16 {
         self.area.height
+    }
+}
+impl std::str::FromStr for Universe {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let v = s
+            .trim()
+            .lines()
+            .map(str::trim)
+            .map(std::convert::Into::into)
+            .collect::<Vec<String>>();
+        Self::from_vec_str(&v)
     }
 }
 
