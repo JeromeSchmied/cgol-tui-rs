@@ -3,18 +3,20 @@ use super::*;
 #[test]
 fn frame_test00() {
     let area = Area::new(3, 2);
-    let univ = Universe::from_str("...\n...");
+    let univ = Universe::from_str("...\n...").unwrap().with_name("frame");
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, Ok(frame));
+    assert_eq!(univ, frame);
 }
 #[test]
 fn frame_test0() {
     let area = Area::new(3, 3);
-    let univ = Universe::from_str("...\n.O.\n...");
+    let univ = Universe::from_str("...\n.O.\n...")
+        .unwrap()
+        .with_name("frame");
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, Ok(frame));
+    assert_eq!(univ, frame);
 }
 #[test]
 fn frame_test1() {
@@ -25,10 +27,12 @@ fn frame_test1() {
 .OO.
 .OO.
 ....",
-    );
+    )
+    .unwrap()
+    .with_name("frame");
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, Ok(frame));
+    assert_eq!(univ, frame);
 }
 #[test]
 fn frame_test2() {
@@ -40,10 +44,12 @@ fn frame_test2() {
 .O.O.
 .OOO.
 .....",
-    );
+    )
+    .unwrap()
+    .with_name("frame");
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, Ok(frame));
+    assert_eq!(univ, frame);
 }
 #[test]
 fn frame_test3() {
@@ -56,10 +62,12 @@ fn frame_test3() {
 .O..O.
 .OOOO.
 ......",
-    );
+    )
+    .unwrap()
+    .with_name("frame");
     let frame = frame(area);
     print!("{frame}");
-    assert_eq!(univ, Ok(frame));
+    assert_eq!(univ, frame);
 }
 
 #[test]

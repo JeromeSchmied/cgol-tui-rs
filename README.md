@@ -29,7 +29,7 @@ eg.:
 -   [x] publishing to crates.io
 -   [x] changing to `Canvas` for rendering viewer block
 -   [x] the ability to parse `.cells` files, from [conwaylife.com](https://conwaylife.com/patterns)
--   [ ] display the names of patterns
+-   [x] display the names of patterns
 
 ## Acknowledgements
 
