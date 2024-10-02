@@ -14,7 +14,7 @@ pub enum HandleError {
 
 pub fn all() -> Vec<Universe> {
     vec![
-        Universe::from_str(FEATHERWEIGTH_SPACESHIP).unwrap(),
+        Universe::from_str(GLIDER).unwrap(),
         Universe::from_str(GOSPER_GLIDER_GUN).unwrap(),
         Universe::from_str(COPPERHEAD).unwrap(),
         Universe::from_str(RABBITS).unwrap(),
@@ -119,8 +119,8 @@ OO........O...O.OO....O.O
 ";
 
 /// 3x3
-pub const FEATHERWEIGTH_SPACESHIP: &str = "\
-!Name: Featherweight spaceship
+pub const GLIDER: &str = "\
+!Name: Glider
 ..O
 O.O
 .OO";

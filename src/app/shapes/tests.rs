@@ -71,9 +71,9 @@ fn frame_test3() {
 }
 
 #[test]
-fn featherweight_spaceship_test() {
+fn glider_test() {
     let area = Area::new(3, 3);
-    let m = Universe::from_str(FEATHERWEIGTH_SPACESHIP).unwrap();
+    let m = Universe::from_str(GLIDER).unwrap();
     assert_eq!(m.area, area);
     dbg!(&m);
     let alive = [(0u8, 2u8), (1u8, 0u8), (1u8, 2u8), (2u8, 1u8), (2u8, 2u8)];

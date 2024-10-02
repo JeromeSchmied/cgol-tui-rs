@@ -62,11 +62,7 @@ fn halp() {
 #[test]
 fn bigass_tickler() {
     let area = Area::new(8, 8);
-    let mut univ = Universe::from_figur(
-        area,
-        Universe::from_str(shapes::FEATHERWEIGTH_SPACESHIP).unwrap(),
-    )
-    .unwrap();
+    let mut univ = Universe::from_figur(area, Universe::from_str(shapes::GLIDER).unwrap()).unwrap();
 
     let exp_unis = [
         "\
@@ -369,7 +365,7 @@ O.O.....
     ];
 
     for exp_uni in exp_unis.map(Universe::from_str) {
-        let exp_uni = exp_uni.unwrap().with_name("Featherweight spaceship");
+        let exp_uni = exp_uni.unwrap().with_name("Glider");
         println!("exp univ:\n{exp_uni}");
         println!("univ:\n{univ}");
         assert_eq!(univ, exp_uni);
