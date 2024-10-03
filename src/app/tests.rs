@@ -62,7 +62,8 @@ fn halp() {
 #[test]
 fn bigass_tickler() {
     let area = Area::new(8, 8);
-    let mut univ = Universe::from_figur(area, Universe::from_str(shapes::GLIDER).unwrap()).unwrap();
+    let mut univ =
+        Universe::from_figur(area, &Universe::from_str(shapes::GLIDER).unwrap()).unwrap();
 
     let exp_unis = [
         "\

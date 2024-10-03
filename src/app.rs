@@ -95,7 +95,7 @@ impl App {
     }
     pub fn restart(&mut self) {
         let univ = self.get();
-        self.universe = Universe::from_figur(self.area, univ).unwrap();
+        self.universe = Universe::from_figur(self.area, &univ).unwrap();
     }
 
     pub fn tick(&mut self) {

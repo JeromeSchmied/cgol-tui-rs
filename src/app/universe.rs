@@ -95,8 +95,8 @@ impl Universe {
     /// Convert properly formatted Vec of Strings to Universe
     fn from_vec_str(s: &[String]) -> Result<Self, String> {
         let s = s.iter();
-        let metadata = s.clone().filter(|l| l.starts_with("!")).collect::<Vec<_>>();
-        let pattern = s.filter(|l| !l.starts_with("!")).collect::<Vec<_>>();
+        let metadata = s.clone().filter(|l| l.starts_with('!')).collect::<Vec<_>>();
+        let pattern = s.filter(|l| !l.starts_with('!')).collect::<Vec<_>>();
 
         let width = pattern
             .iter()
@@ -110,7 +110,7 @@ impl Universe {
         if let Some(name) = metadata.first() {
             let name = name
                 .replace(".cells", "")
-                .replace("!", "")
+                .replace('!', "")
                 .replace("Name:", "");
             let name = name.trim();
             univ.name = name.to_string();
@@ -130,7 +130,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(area: Area, figur: Universe) -> Result<Universe, HandleError> {
+    pub fn from_figur(area: Area, figur: &Universe) -> Result<Universe, HandleError> {
         let count_alive = |univ: &Universe| -> usize {
             univ.cells
                 .iter()
@@ -138,7 +138,7 @@ impl Universe {
                 .count()
         };
 
-        let figur_alive = count_alive(&figur);
+        let figur_alive = count_alive(figur);
 
         if area < figur.area {
             return Err(HandleError::TooBig);
