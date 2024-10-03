@@ -30,8 +30,8 @@ where <pattern> is either a .cells file, or - for stdin"
     let universes = args
         .iter()
         .flat_map(std::fs::read_to_string)
-        .map(|s| Universe::from_str(&s))
-        .collect::<Result<Vec<_>, _>>()?;
+        .flat_map(|s| Universe::from_str(&s))
+        .collect::<Vec<_>>();
 
     let mut app = App::default().with_universes([universes, piped_universe].concat());
 
