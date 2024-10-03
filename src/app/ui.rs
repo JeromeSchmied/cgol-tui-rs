@@ -52,8 +52,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
         .constraints([Constraint::Percentage(100)])
         .split(chunks[1]);
 
-    let current_keys_hint =
-        "[q]uit, [r]estart, [R]eset, [n]ext, [p]rev, play[ ]pause, speed: 'k' ↑, 'j' ↓".yellow();
+    let current_keys_hint = "[q]uit, [r]estart, pause: [ ], nav: vim/arrows".yellow();
 
     let poll_t = {
         if let std::time::Duration::MAX = app.poll_t {
