@@ -19,9 +19,9 @@ eg.:
 
 ### Script
 
-there is a fish script provided under [scripts](./scripts/pattern.fish) for viewing patterns from [conwaylife.com](https://conwaylife.com/patterns)
-usage: `pattern.fish <PATTERN_NAME> [OPTIONS]`
-PATTERN_NAME: either a name of a pattern, or nothing to list all patterns
+there is a fish script provided under [scripts](./scripts/pattern.fish) for viewing patterns from [conwaylife.com](https://conwaylife.com/patterns)</br>
+usage: `pattern.fish <PATTERN_NAME> [OPTIONS]`</br>
+PATTERN_NAME: either a name of a pattern, or nothing to list all patterns</br>
 OPTIONS: -d, --download     download to /tmp
 
 #### needed tools
