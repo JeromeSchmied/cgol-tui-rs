@@ -17,6 +17,19 @@ eg.:
 -   `curl https://conwaylife.com/patterns/fx153.cells | cgol-tui -` the `-` stands for `stdin`
 -   `cgol-tui my_own_pattern.cells fx153.cells`
 
+### Script
+
+there is a fish script provided under [scripts](./scripts/pattern.fish) for viewing patterns from [conwaylife.com](https://conwaylife.com/patterns)</br>
+usage: `pattern.fish <PATTERN_NAME> [OPTIONS]`</br>
+PATTERN_NAME: either a name of a pattern, or nothing to list all patterns</br>
+OPTIONS: -d, --download     download to /tmp
+
+#### needed tools
+
+- [fish](https://fishshell.com/): shell
+- [curl](https://curl.se/): download
+- [ripgrep](https://github.com/BurntSushi/ripgrep): only for listing all patterns
+
 ## Sample
 
 ![Sample][1]
@@ -29,7 +42,7 @@ eg.:
 -   [x] publishing to crates.io
 -   [x] changing to `Canvas` for rendering viewer block
 -   [x] the ability to parse `.cells` files, from [conwaylife.com](https://conwaylife.com/patterns)
--   [ ] display the names of patterns
+-   [x] display the names of patterns
 
 ## Acknowledgements
 

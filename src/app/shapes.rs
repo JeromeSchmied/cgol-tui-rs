@@ -14,7 +14,7 @@ pub enum HandleError {
 
 pub fn all() -> Vec<Universe> {
     vec![
-        Universe::from_str(FEATHERWEIGTH_SPACESHIP).unwrap(),
+        Universe::from_str(GLIDER).unwrap(),
         Universe::from_str(GOSPER_GLIDER_GUN).unwrap(),
         Universe::from_str(COPPERHEAD).unwrap(),
         Universe::from_str(RABBITS).unwrap(),
@@ -35,7 +35,7 @@ pub fn get_special(i: usize, area: Area) -> Universe {
 
 pub fn rand(area: Area) -> Universe {
     let cells = (0..area.len()).map(|_i| fastrand::bool().into()).collect();
-    Universe { area, cells }
+    Universe::new(area, cells, "random")
 }
 
 pub fn stripes(area: Area) -> Universe {
@@ -48,17 +48,17 @@ pub fn stripes(area: Area) -> Universe {
             }
         })
         .collect();
-    Universe { area, cells }
+    Universe::new(area, cells, "stripes")
 }
 
 pub fn empty(area: Area) -> Universe {
     let cells = vec![Cell::Dead; area.len()];
-    Universe::new(area, cells)
+    Universe::new(area, cells, "empty")
 }
 
 pub fn full(area: Area) -> Universe {
     let cells = vec![Cell::Alive; area.len()];
-    Universe { area, cells }
+    Universe::new(area, cells, "full")
 }
 
 /// height: 5
@@ -71,7 +71,7 @@ pub fn full(area: Area) -> Universe {
 /// 4.....4
 ///  01234
 pub fn frame(area: Area) -> Universe {
-    let mut univ = empty(area);
+    let mut univ = empty(area).with_name("frame");
     if area.height < 3 || area.width < 3 {
         return univ;
     }
@@ -92,6 +92,7 @@ pub fn frame(area: Area) -> Universe {
 }
 
 pub const COPPERHEAD: &str = "\
+!Name: Copperhead
 .....O.OO...
 ....O......O
 ...OO...O..O
@@ -118,13 +119,15 @@ OO........O...O.OO....O.O
 ";
 
 /// 3x3
-pub const FEATHERWEIGTH_SPACESHIP: &str = "\
+pub const GLIDER: &str = "\
+!Name: Glider
 ..O
 O.O
 .OO";
 
 /// 8x4
 pub const RABBITS: &str = "\
+!Name: Rabbits
 O.....O.
 ..O...O.
 ..O..O.O
@@ -132,6 +135,7 @@ O.....O.
 
 /// 3×5
 pub const BONK_TIE: &str = "\
+!Name: Bonk tie
 OO
 OO
 ..O
@@ -140,6 +144,7 @@ OO
 
 /// 7×3
 pub const ACORN: &str = "\
+!Name: Acorn
 .O
 ...O
 OO..OOO";

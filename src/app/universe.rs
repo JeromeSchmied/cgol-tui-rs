@@ -8,6 +8,7 @@ use super::shapes;
 pub struct Universe {
     pub area: Area,
     pub cells: Vec<Cell>,
+    pub name: String,
 }
 impl<U1: Into<usize>, U2: Into<usize>> std::ops::Index<(U1, U2)> for Universe {
     type Output = Cell;
@@ -33,9 +34,23 @@ impl<U1: Into<usize>, U2: Into<usize>> std::ops::IndexMut<(U1, U2)> for Universe
 }
 
 impl Universe {
-    pub fn new(area: Area, cells: Vec<Cell>) -> Self {
-        Self { area, cells }
+    pub fn new(area: Area, cells: Vec<Cell>, name: impl AsRef<str>) -> Self {
+        Self {
+            area,
+            cells,
+            name: name.as_ref().into(),
+        }
     }
+    pub fn with_name(self, name: impl AsRef<str>) -> Self {
+        Self {
+            name: name.as_ref().into(),
+            ..self
+        }
+    }
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
     fn get_idx(&self, row: impl Into<usize>, col: impl Into<usize>) -> usize {
         let row = row.into();
         let col = col.into();
@@ -79,15 +94,29 @@ impl Universe {
 
     /// Convert properly formatted Vec of Strings to Universe
     fn from_vec_str(s: &[String]) -> Result<Self, String> {
-        let width = s.iter().map(|ln| ln.chars().count()).max().unwrap_or(0) as u16;
-        let height = s.len() as u16;
+        let s = s.iter();
+        let metadata = s.clone().filter(|l| l.starts_with('!')).collect::<Vec<_>>();
+        let pattern = s.filter(|l| !l.starts_with('!')).collect::<Vec<_>>();
+
+        let width = pattern
+            .iter()
+            .map(|ln| ln.chars().count())
+            .max()
+            .unwrap_or(0) as u16;
+        let height = pattern.len() as u16;
         let area = Area::new(width, height);
         let mut univ = shapes::empty(area);
 
-        for (i, line) in s.iter().enumerate() {
-            if line.starts_with('!') {
-                continue; // ignore comment
-            }
+        if let Some(name) = metadata.first() {
+            let name = name
+                .replace(".cells", "")
+                .replace('!', "")
+                .replace("Name:", "");
+            let name = name.trim();
+            univ.name = name.to_string();
+        };
+
+        for (i, line) in pattern.iter().enumerate() {
             for (j, ch) in line.chars().enumerate() {
                 univ[(i, j)] = ch.try_into()?;
             }
@@ -101,7 +130,7 @@ impl Universe {
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(area: Area, figur: Universe) -> Result<Universe, HandleError> {
+    pub fn from_figur(area: Area, figur: &Universe) -> Result<Universe, HandleError> {
         let count_alive = |univ: &Universe| -> usize {
             univ.cells
                 .iter()
@@ -109,13 +138,13 @@ impl Universe {
                 .count()
         };
 
-        let figur_alive = count_alive(&figur);
+        let figur_alive = count_alive(figur);
 
         if area < figur.area {
             return Err(HandleError::TooBig);
         }
 
-        let mut univ = shapes::empty(area);
+        let mut univ = shapes::empty(area).with_name(figur.name());
 
         let (start_row, start_col) = (
             (area.height - figur.height()) / 2,

@@ -28,7 +28,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
     let cgol = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
-        .title("Conway's Game of Life");
+        .title(format!("Conway's Game of Life - {} ", app.universe.name));
     // 2 blocks less: border
     let new_area = Area::new(
         (chunks[0].width - 2) * BRAILLE.width,
@@ -52,8 +52,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
         .constraints([Constraint::Percentage(100)])
         .split(chunks[1]);
 
-    let current_keys_hint =
-        "[q]uit, [r]estart, [R]eset, [n]ext, [p]rev, play[ ]pause, speed: 'k' ↑, 'j' ↓".yellow();
+    let current_keys_hint = "[q]uit, [r]estart, pause: [ ], nav: vim/arrows".yellow();
 
     let poll_t = {
         if let std::time::Duration::MAX = app.poll_t {

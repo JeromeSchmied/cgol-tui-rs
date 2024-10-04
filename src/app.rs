@@ -1,6 +1,6 @@
 pub use area::Area;
 pub use cell::Cell;
-use ratatui::crossterm::event::{self, Event, KeyEventKind};
+use ratatui::crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
 pub use shapes::HandleError;
 pub use std::str::FromStr;
@@ -12,8 +12,6 @@ const DEF_DUR: Duration = Duration::from_millis(400);
 
 mod area;
 mod cell;
-/// Keymaps to handle input events
-mod kmaps;
 /// Starting shapes
 pub mod shapes;
 /// ui
@@ -95,7 +93,7 @@ impl App {
     }
     pub fn restart(&mut self) {
         let univ = self.get();
-        self.universe = Universe::from_figur(self.area, univ).unwrap();
+        self.universe = Universe::from_figur(self.area, &univ).unwrap();
     }
 
     pub fn tick(&mut self) {
@@ -150,14 +148,14 @@ impl App {
                         continue;
                     }
                     match key.code {
-                        kmaps::QUIT => break,
-                        kmaps::SLOWER => self.slower(false),
-                        kmaps::FASTER => self.faster(false),
-                        kmaps::PLAY_PAUSE => self.play_pause(&mut prev_poll_t),
-                        kmaps::RESTART => self.restart(),
-                        kmaps::NEXT => self.next(),
-                        kmaps::PREV => self.prev(),
-                        kmaps::RESET => *self = Self::default(),
+                        KeyCode::Char('q') | KeyCode::Esc => break,
+                        KeyCode::Char('j') | KeyCode::Down => self.slower(false),
+                        KeyCode::Char('k') | KeyCode::Up => self.faster(false),
+                        KeyCode::Char(' ') | KeyCode::Enter => self.play_pause(&mut prev_poll_t),
+                        KeyCode::Char('r') => self.restart(),
+                        KeyCode::Char('n') | KeyCode::Char('l') | KeyCode::Right => self.next(),
+                        KeyCode::Char('p') | KeyCode::Char('h') | KeyCode::Left => self.prev(),
+                        KeyCode::Char('R') | KeyCode::Backspace => *self = Self::default(),
                         _ => {}
                     }
                 } else {

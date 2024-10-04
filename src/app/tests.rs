@@ -2,7 +2,7 @@ use super::*;
 
 fn gen_uni(area: Area, cells: &[bool]) -> Universe {
     let cells = cells.iter().map(|c| (*c).into()).collect::<Vec<Cell>>();
-    Universe { area, cells }
+    Universe::new(area, cells, "test")
 }
 
 #[test]
@@ -13,7 +13,7 @@ OO..O
 
 ...O
 ..O";
-    let univ = Universe::from_str(figur).unwrap();
+    let univ = Universe::from_str(figur).unwrap().with_name("test");
     let cells = [
         /* 1st row */ false, false, true, false, false, /* 2nd row */ true, true, false,
         false, true, /* 3rd row */ false, false, false, false, false,
@@ -30,7 +30,7 @@ fn full() {
     let full = shapes::full(area);
     let cells = vec![true; area.len()];
     let uni = gen_uni(area, &cells);
-    assert_eq!(full, uni);
+    assert_eq!(full, uni.with_name("full"));
 }
 #[test]
 fn halp() {
@@ -62,11 +62,8 @@ fn halp() {
 #[test]
 fn bigass_tickler() {
     let area = Area::new(8, 8);
-    let mut univ = Universe::from_figur(
-        area,
-        Universe::from_str(shapes::FEATHERWEIGTH_SPACESHIP).unwrap(),
-    )
-    .unwrap();
+    let mut univ =
+        Universe::from_figur(area, &Universe::from_str(shapes::GLIDER).unwrap()).unwrap();
 
     let exp_unis = [
         "\
@@ -369,7 +366,7 @@ O.O.....
     ];
 
     for exp_uni in exp_unis.map(Universe::from_str) {
-        let exp_uni = exp_uni.unwrap();
+        let exp_uni = exp_uni.unwrap().with_name("Glider");
         println!("exp univ:\n{exp_uni}");
         println!("univ:\n{univ}");
         assert_eq!(univ, exp_uni);
