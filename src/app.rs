@@ -153,8 +153,8 @@ impl App {
                         KeyCode::Char('k') | KeyCode::Up => self.faster(false),
                         KeyCode::Char(' ') | KeyCode::Enter => self.play_pause(&mut prev_poll_t),
                         KeyCode::Char('r') => self.restart(),
-                        KeyCode::Char('n') | KeyCode::Char('l') | KeyCode::Right => self.next(),
-                        KeyCode::Char('p') | KeyCode::Char('h') | KeyCode::Left => self.prev(),
+                        KeyCode::Char('n' | 'l') | KeyCode::Right => self.next(),
+                        KeyCode::Char('p' | 'h') | KeyCode::Left => self.prev(),
                         KeyCode::Char('R') | KeyCode::Backspace => *self = Self::default(),
                         _ => {}
                     }

@@ -12,4 +12,4 @@ categories = ["games"]
 
 [dependencies]
 fastrand = "2.1.1"
-ratatui = "0.28.1"
+ratatui = "0.29.0"
