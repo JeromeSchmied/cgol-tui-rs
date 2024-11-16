@@ -11,5 +11,5 @@ keywords = ["conway", "game-of-life", "tui"]
 categories = ["games"]
 
 [dependencies]
-fastrand = "2.1.1"
+fastrand = "2.2.0"
 ratatui = "0.29.0"
