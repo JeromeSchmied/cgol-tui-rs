@@ -26,6 +26,12 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
 
+      - name: Run cargo fmt
+        run: cargo fmt --all --check
+
+      - name: Run cargo clippy
+        run: cargo clippy --all-targets
+
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
