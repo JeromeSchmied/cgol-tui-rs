@@ -11,7 +11,10 @@ env:
 
 jobs:
   build:
-    runs-on: ["macos-latest", "ubuntu-latest", "windows-latest"]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+          os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -26,5 +29,5 @@ jobs:
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
-          name: cgol-tui_*
-          path: target/*/release/cgol-tui*
+          name: cgol-tui_${{ matrix.os }}
+          path: target/release/cgol-tui*
