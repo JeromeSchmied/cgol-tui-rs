@@ -14,35 +14,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          - os: macos-latest
-            target: aarch64-apple-darwin
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
+          os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: swatinem/rust-cache@v2
 
-      - name: Cache dependencies
-        uses: swatinem/rust-cache@v2
-
-      - name: Build
-        uses: ClementTsang/cargo-action@v0.0.6
-        with:
-          args: --release --target ${{ matrix.target }} --verbose
-          command: build
+      - name: Build release
+        run: cargo build --release --verbose
 
       - name: Run tests
-        uses: ClementTsang/cargo-action@v0.0.6
-        with:
-          args: --target ${{ matrix.target }} --verbose
-          command: test
+        run: cargo test --verbose
+
+      - name: Run cargo fmt
+        run: cargo fmt --all --check
+
+      - name: Run cargo clippy
+        run: cargo clippy --all-targets
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
-          name: cgol-tui-${{ matrix.os }}
-          path: target/${{ matrix.target }}/release/cgol-tui*
+          name: cgol-tui_${{ matrix.os }}
+          path: target/release/cgol-tui*
