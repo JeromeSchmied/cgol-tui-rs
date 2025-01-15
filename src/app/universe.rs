@@ -1,5 +1,5 @@
 use super::shapes;
-use crate::{app::Area, app::Cell, app::HandleError};
+use crate::{app::Area, app::Cell};
 use ratatui::{style::Color, widgets::canvas::Shape};
 
 /// the `Universe` in which game plays. Represented as a `Vec` of `Cell`s.
@@ -118,12 +118,12 @@ impl Universe {
         Ok(univ)
     }
 
-    /// Create universe with width, height: inserting starting shape into the middle
+    /// Create universe with width, height: inserting shape into the middle
     ///
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(area: Area, figur: &Universe) -> Result<Universe, HandleError> {
+    pub fn from_figur(area: Area, figur: Universe) -> Result<Universe, ()> {
         let count_alive = |univ: &Universe| -> usize {
             univ.cells
                 .iter()
@@ -131,10 +131,10 @@ impl Universe {
                 .count()
         };
 
-        let figur_alive = count_alive(figur);
+        let figur_alive = count_alive(&figur);
 
         if area < figur.area {
-            return Err(HandleError::TooBig);
+            return Err(());
         }
 
         let mut univ = shapes::empty(area).with_name(figur.name());
@@ -152,11 +152,8 @@ impl Universe {
             }
         }
 
-        if figur_alive == count_alive(&univ) {
-            Ok(univ)
-        } else {
-            Err(HandleError::Other)
-        }
+        assert_eq!(figur_alive, count_alive(&univ), "faulty algorithm");
+        Ok(univ)
     }
 
     /// update life: `Universe`

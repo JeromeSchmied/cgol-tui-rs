@@ -1,8 +1,7 @@
 pub use area::Area;
 pub use cell::Cell;
-use ratatui::crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
-pub use shapes::HandleError;
 use std::{io, str::FromStr, time::Duration};
 pub use universe::Universe;
 
@@ -70,10 +69,7 @@ impl App {
     pub fn get(&self) -> Universe {
         let true_len = self.available_universes.len();
         if self.i < true_len {
-            self.available_universes
-                .get(self.i)
-                .expect("display area is too small to fit current shape")
-                .clone()
+            self.available_universes.get(self.i).unwrap().clone()
         } else {
             shapes::get_special(self.i - true_len, self.area)
         }
@@ -92,8 +88,9 @@ impl App {
         }
     }
     pub fn restart(&mut self) {
-        let univ = self.get();
-        self.universe = Universe::from_figur(self.area, &univ).unwrap();
+        let figur = self.get();
+        self.universe = Universe::from_figur(self.area, figur)
+            .expect("display area should be big enough to fit this figure");
     }
 
     pub fn tick(&mut self) {
