@@ -3,12 +3,13 @@ pub use cell::Cell;
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
 pub use shapes::HandleError;
-pub use std::str::FromStr;
-use std::{io, time::Duration};
+use std::{io, str::FromStr, time::Duration};
 pub use universe::Universe;
 
 /// Default poll duration
 const DEF_DUR: Duration = Duration::from_millis(400);
+/// Pause duration: a day
+const PAUSE: Duration = Duration::from_secs(60 * 60 * 24);
 
 mod area;
 mod cell;
@@ -87,7 +88,7 @@ impl App {
             self.poll_t = *prev_poll_t;
         } else {
             *prev_poll_t = self.poll_t;
-            self.poll_t = Duration::MAX;
+            self.poll_t = PAUSE;
         }
         self.paused = !self.paused;
     }
