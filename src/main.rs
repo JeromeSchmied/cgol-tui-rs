@@ -14,10 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     ratatui::try_restore()?;
 
-    // if any error has occured while executing, print it in cooked mode
-    res.inspect_err(|e| println!("error: {e:?}"))?;
-
-    Ok(())
+    Ok(res?)
 }
 
 fn parse_args() -> Result<Vec<Universe>, Box<dyn std::error::Error>> {
