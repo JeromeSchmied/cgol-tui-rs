@@ -3,12 +3,13 @@ pub use cell::Cell;
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{backend::Backend, Terminal};
 pub use shapes::HandleError;
-pub use std::str::FromStr;
-use std::{io, time::Duration};
+use std::{io, str::FromStr, time::Duration};
 pub use universe::Universe;
 
 /// Default poll duration
 const DEF_DUR: Duration = Duration::from_millis(400);
+/// Pause duration: a day
+const PAUSE: Duration = Duration::from_secs(60 * 60 * 24);
 
 mod area;
 mod cell;
@@ -27,7 +28,6 @@ pub struct App {
     universe: Universe,
     i: usize,
     pub poll_t: Duration,
-    pub paused: bool,
     pub area: Area,
 }
 impl Default for App {
@@ -37,7 +37,6 @@ impl Default for App {
             universe: Universe::default(),
             i: 0,
             poll_t: DEF_DUR,
-            paused: false,
             available_universes: shapes::all(),
         }
     }
@@ -55,9 +54,11 @@ impl App {
             universe: available_universes[0].clone(),
             i: 0,
             poll_t,
-            paused: false,
             available_universes,
         }
+    }
+    pub fn paused(&self) -> bool {
+        self.poll_t == PAUSE
     }
     pub fn len(&self) -> usize {
         self.available_universes.len() + shapes::N
@@ -83,13 +84,12 @@ impl App {
     // }
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
-        if self.paused {
+        if self.paused() {
             self.poll_t = *prev_poll_t;
         } else {
             *prev_poll_t = self.poll_t;
-            self.poll_t = Duration::MAX;
+            self.poll_t = PAUSE;
         }
-        self.paused = !self.paused;
     }
     pub fn restart(&mut self) {
         let univ = self.get();
@@ -101,7 +101,7 @@ impl App {
     }
 
     pub fn faster(&mut self, big: bool) {
-        if !self.paused {
+        if !self.paused() {
             let div = if big { 2 } else { 5 };
             self.poll_t = self
                 .poll_t
@@ -110,7 +110,7 @@ impl App {
         }
     }
     pub fn slower(&mut self, big: bool) {
-        if !self.paused {
+        if !self.paused() {
             let div = if big { 2 } else { 5 };
             self.poll_t = self
                 .poll_t
