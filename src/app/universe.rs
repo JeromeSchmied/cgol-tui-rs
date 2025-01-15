@@ -1,7 +1,6 @@
-use crate::{app::Area, app::Cell, app::HandleError};
-use ratatui::{style::Color, widgets::canvas::Shape};
-
 use super::shapes;
+use crate::{app::Area, app::Cell};
+use ratatui::{style::Color, widgets::canvas::Shape};
 
 /// the `Universe` in which game plays. Represented as a `Vec` of `Cell`s.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -14,46 +13,42 @@ impl<U1: Into<usize>, U2: Into<usize>> std::ops::Index<(U1, U2)> for Universe {
     type Output = Cell;
 
     fn index(&self, idx: (U1, U2)) -> &Self::Output {
-        let row = idx.0.into();
-        let col = idx.1.into();
         // Convert (x;y) to index
-        let idx = self.get_idx(row, col);
+        let idx = self.get_idx(idx);
 
         &self.cells[idx]
     }
 }
 impl<U1: Into<usize>, U2: Into<usize>> std::ops::IndexMut<(U1, U2)> for Universe {
     fn index_mut(&mut self, idx: (U1, U2)) -> &mut Self::Output {
-        let row = idx.0.into();
-        let col = idx.1.into();
         // Convert (x;y) to index
-        let idx = self.get_idx(row, col);
+        let idx = self.get_idx(idx);
 
         &mut self.cells[idx]
     }
 }
 
 impl Universe {
-    pub fn new(area: Area, cells: Vec<Cell>, name: impl AsRef<str>) -> Self {
+    pub fn new(area: Area, cells: Vec<Cell>, name: impl ToString) -> Self {
         Self {
             area,
             cells,
-            name: name.as_ref().into(),
+            name: name.to_string(),
         }
     }
-    pub fn with_name(self, name: impl AsRef<str>) -> Self {
+    pub fn with_name(self, name: impl ToString) -> Self {
         Self {
-            name: name.as_ref().into(),
+            name: name.to_string(),
             ..self
         }
     }
-    pub fn name(&self) -> String {
-        self.name.clone()
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
-    fn get_idx(&self, row: impl Into<usize>, col: impl Into<usize>) -> usize {
-        let row = row.into();
-        let col = col.into();
+    fn get_idx(&self, coord: (impl Into<usize>, impl Into<usize>)) -> usize {
+        let row = coord.0.into();
+        let col = coord.1.into();
         assert!(
             (0..self.area.height).contains(&(row as u16)),
             "index out of range: len is {}, but index is {row}",
@@ -94,9 +89,7 @@ impl Universe {
 
     /// Convert properly formatted Vec of Strings to Universe
     fn from_vec_str(s: &[String]) -> Result<Self, String> {
-        let s = s.iter();
-        let metadata = s.clone().filter(|l| l.starts_with('!')).collect::<Vec<_>>();
-        let pattern = s.filter(|l| !l.starts_with('!')).collect::<Vec<_>>();
+        let (metadata, pattern): (Vec<_>, Vec<_>) = s.iter().partition(|l| l.starts_with('!'));
 
         let width = pattern
             .iter()
@@ -125,12 +118,12 @@ impl Universe {
         Ok(univ)
     }
 
-    /// Create universe with width, height: inserting starting shape into the middle
+    /// Create universe with width, height: inserting shape into the middle
     ///
     /// # Errors
     ///
     /// if shape can't fit universe
-    pub fn from_figur(area: Area, figur: &Universe) -> Result<Universe, HandleError> {
+    pub fn from_figur(area: Area, figur: Universe) -> Result<Universe, ()> {
         let count_alive = |univ: &Universe| -> usize {
             univ.cells
                 .iter()
@@ -138,10 +131,10 @@ impl Universe {
                 .count()
         };
 
-        let figur_alive = count_alive(figur);
+        let figur_alive = count_alive(&figur);
 
         if area < figur.area {
-            return Err(HandleError::TooBig);
+            return Err(());
         }
 
         let mut univ = shapes::empty(area).with_name(figur.name());
@@ -159,11 +152,8 @@ impl Universe {
             }
         }
 
-        if figur_alive == count_alive(&univ) {
-            Ok(univ)
-        } else {
-            Err(HandleError::Other)
-        }
+        assert_eq!(figur_alive, count_alive(&univ), "faulty algorithm");
+        Ok(univ)
     }
 
     /// update life: `Universe`

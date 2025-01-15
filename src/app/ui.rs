@@ -1,9 +1,9 @@
 use crate::{app::App, app::Area};
 use ratatui::{
-    layout::{Constraint, Direction, Layout},
+    layout::{Constraint, Layout},
     style::Stylize,
     text::Line,
-    widgets::{canvas::Canvas, Block, BorderType, Borders},
+    widgets::{canvas::Canvas, Block, BorderType},
     Frame,
 };
 
@@ -13,22 +13,20 @@ const BRAILLE: Area = Area {
     height: 4,
 };
 
+/// ```text
+///  _cgol_______________
+/// |                    |
+/// |                    |
+/// |                    |
+/// |____________________|
+/// |____________________|
+/// ```
 pub fn ui(f: &mut Frame, app: &mut App) {
-    //  _cgol_______________
-    // |                    |
-    // |                    |
-    // |                    |
-    // |____________________|
-    // |____________________|
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Fill(1), Constraint::Length(1)])
-        .split(f.area());
+    let chunks = Layout::vertical([Constraint::Fill(1), Constraint::Length(1)]).split(f.area());
 
-    let cgol = Block::default()
-        .borders(Borders::ALL)
+    let cgol = Block::bordered()
         .border_type(BorderType::Rounded)
-        .title(format!("Conway's Game of Life - {} ", app.universe.name));
+        .title(format!(" Conway's Game of Life - {} ", app.universe.name));
     // 2 blocks less: border
     let new_area = Area::new(
         (chunks[0].width - 2) * BRAILLE.width,
@@ -47,10 +45,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
 
     f.render_widget(universe, chunks[0]);
 
-    let footer = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(100)])
-        .split(chunks[1]);
+    let footer = Layout::horizontal([Constraint::Fill(1)]).split(chunks[1]);
 
     let current_keys_hint = "[q]uit, [r]estart, pause: [ ], nav: vim/arrows".yellow();
 

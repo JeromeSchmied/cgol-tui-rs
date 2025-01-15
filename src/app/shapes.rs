@@ -1,16 +1,10 @@
 use super::*;
 
+/// Number of special shapes supported
 pub const N: usize = 4;
 
 #[cfg(test)]
 mod tests;
-
-#[derive(Debug)]
-pub enum HandleError {
-    OutOfRange,
-    TooBig,
-    Other,
-}
 
 pub fn all() -> Vec<Universe> {
     vec![
