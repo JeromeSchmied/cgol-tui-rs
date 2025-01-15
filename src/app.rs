@@ -28,7 +28,6 @@ pub struct App {
     universe: Universe,
     i: usize,
     pub poll_t: Duration,
-    pub paused: bool,
     pub area: Area,
 }
 impl Default for App {
@@ -38,7 +37,6 @@ impl Default for App {
             universe: Universe::default(),
             i: 0,
             poll_t: DEF_DUR,
-            paused: false,
             available_universes: shapes::all(),
         }
     }
@@ -56,9 +54,11 @@ impl App {
             universe: available_universes[0].clone(),
             i: 0,
             poll_t,
-            paused: false,
             available_universes,
         }
+    }
+    pub fn paused(&self) -> bool {
+        self.poll_t == PAUSE
     }
     pub fn len(&self) -> usize {
         self.available_universes.len() + shapes::N
@@ -84,13 +84,12 @@ impl App {
     // }
 
     pub fn play_pause(&mut self, prev_poll_t: &mut Duration) {
-        if self.paused {
+        if self.paused() {
             self.poll_t = *prev_poll_t;
         } else {
             *prev_poll_t = self.poll_t;
             self.poll_t = PAUSE;
         }
-        self.paused = !self.paused;
     }
     pub fn restart(&mut self) {
         let univ = self.get();
@@ -102,7 +101,7 @@ impl App {
     }
 
     pub fn faster(&mut self, big: bool) {
-        if !self.paused {
+        if !self.paused() {
             let div = if big { 2 } else { 5 };
             self.poll_t = self
                 .poll_t
@@ -111,7 +110,7 @@ impl App {
         }
     }
     pub fn slower(&mut self, big: bool) {
-        if !self.paused {
+        if !self.paused() {
             let div = if big { 2 } else { 5 };
             self.poll_t = self
                 .poll_t
