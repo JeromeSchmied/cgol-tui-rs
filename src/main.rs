@@ -30,7 +30,7 @@ USAGE: cgol-tui [<pattern>,...]
 
 where <pattern> is either a .cells file, or - for stdin"
         );
-        std::process::exit(1);
+        std::process::exit(0);
     }
     let piped_universe = {
         let mut univ = String::new();
