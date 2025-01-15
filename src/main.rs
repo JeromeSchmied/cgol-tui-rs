@@ -4,6 +4,23 @@ use std::{io::Read, str::FromStr};
 pub mod app;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let arg_universes = parse_args()?;
+
+    let mut app = App::default().with_universes(arg_universes);
+
+    let mut terminal = ratatui::try_init()?;
+
+    let res = app.run(&mut terminal);
+
+    ratatui::try_restore()?;
+
+    // if any error has occured while executing, print it in cooked mode
+    res.inspect_err(|e| println!("error: {e:?}"))?;
+
+    Ok(())
+}
+
+fn parse_args() -> Result<Vec<Universe>, Box<dyn std::error::Error>> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     if args.contains(&"-h".into()) || args.contains(&"--help".into()) {
         println!(
@@ -15,7 +32,6 @@ where <pattern> is either a .cells file, or - for stdin"
         );
         std::process::exit(1);
     }
-
     let piped_universe = {
         let mut univ = String::new();
         if args.len() == 1 && args[0] == "-" {
@@ -33,16 +49,5 @@ where <pattern> is either a .cells file, or - for stdin"
         .flat_map(|s| Universe::from_str(&s))
         .collect::<Vec<_>>();
 
-    let mut app = App::default().with_universes([universes, piped_universe].concat());
-
-    let mut terminal = ratatui::try_init()?;
-
-    let res = app.run(&mut terminal);
-
-    ratatui::try_restore()?;
-
-    // if any error has occured while executing, print it in cooked mode
-    res.inspect_err(|e| println!("error: {e:?}"))?;
-
-    Ok(())
+    Ok([universes, piped_universe].concat())
 }
