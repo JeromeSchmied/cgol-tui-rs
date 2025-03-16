@@ -4,16 +4,16 @@ set cmd $argv[1]
 switch $cmd
     case ls list ''
         echo "listing all patterns..."
-        for line in "$(curl https://conwaylife.com/patterns/ | rg .cells)"
+        for line in "$(curl https://conwaylife.com/patterns/ | grep .cells)"
             echo $line | string split '"' -f 2
         end
         exit 0
 
     case --help -h help
-        echo "Usage: pattern.fish [opts] <pattern>"
+        echo "Usage: pattern.fish [opts] <PATTERN>"
         echo ""
         echo "opts:"
-        echo "         -d, --download: download `<pattern>` to /tmp/<pattern>"
+        echo "         -d, --download: download <PATTERN> to /tmp/<PATTERN>"
         echo "         -h, --help    : show this msg"
         echo ""
         echo "pattern:"
