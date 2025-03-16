@@ -30,7 +30,6 @@ OPTIONS: -d, --download     download to /tmp
 
 - [fish][fish-home]: shell
 - [curl](https://curl.se/): download
-- [ripgrep](https://github.com/BurntSushi/ripgrep): only for listing all patterns, could be replaced by `grep`
 
 ## Sample
 
@@ -41,7 +40,7 @@ OPTIONS: -d, --download     download to /tmp
 -   [x] initial tui support
 -   [x] renaming on gh
 -   [x] error handling
--   [x] publishing to crates.io
+-   [x] publishing on crates.io
 -   [x] changing to `Canvas` for rendering viewer block
 -   [x] the ability to parse `.cells` files, from [conwaylife.com][conway-patterns]
 -   [x] display the names of patterns
@@ -71,4 +70,4 @@ conditions.
 
 [1]: assets/0.4.0.png "Image of using cgol-tui in Alacritty on Arch Linux btw"
 [fish-home]: https://fishshell.com
-[conway-patterns]: https://conwaylife.com/patterns
+[conway-patterns]: https://conwaylife.com/patterns/
