@@ -1,6 +1,5 @@
 # Conway's Game of Life TUI in Rust
 
-
 ## Installation 
 
 -   there are pre-built binaries for mainstream platforms: [releases](https://github.com/JeromeSchmied/cgol-tui-rs/releases/latest)
@@ -12,7 +11,7 @@
 
 ## Usage
 
-`[curl "https://conwaylife.com/patterns/<pattern>.cells"] cgol-tui [[-],<pattern>.cells,...]`  
+`cgol-tui --help`  
 
 eg.:
 -   `cgol-tui` run the app with builtin patterns
@@ -22,9 +21,8 @@ eg.:
 ### Script
 
 there is a [fish][fish-home] script provided under [scripts](./scripts/pattern.fish) for viewing patterns from [conwaylife.com][conway-patterns]</br>
-usage: `pattern.fish <PATTERN_NAME> [OPTIONS]`</br>
-PATTERN_NAME: either a name of a pattern, or nothing to list all patterns</br>
-OPTIONS: -d, --download     download to /tmp
+
+see `fish scripts/pattern.fish --help`
 
 #### needed tools
 
